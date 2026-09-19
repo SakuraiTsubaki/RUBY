@@ -184,7 +184,7 @@ def sync_item_table(path: Path, items: list[dict], symbol_to_id: dict[str, int])
         changed = False
         for field, value in v.items():
             current_match = re.search(
-                r"(?m)^\\s*\\." + re.escape(field) + r"\\s*=\\s*([^,\\n}]+)",
+                r"(?m)^\s*\." + re.escape(field) + r"\s*=\s*([^,\n}]+)",
                 block,
             )
             current = current_match.group(1).strip() if current_match else None
