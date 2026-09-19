@@ -1,5 +1,8 @@
 name: Generate Emerald item parameter sync
 
+permissions:
+  contents: write
+
 on:
   push:
     paths:
@@ -52,6 +55,21 @@ jobs:
           git -C pokeruby diff --binary > emerald-item-parameters.patch
           sha256sum emerald-item-parameters.patch
           wc -l emerald-item-parameters.patch
+
+      - name: Commit generated patch
+        run: |
+          set -euxo pipefail
+          mkdir -p patches/pokeruby
+          cp emerald-item-parameters.patch patches/pokeruby/emerald-item-parameters.patch
+          if git diff --quiet -- patches/pokeruby/emerald-item-parameters.patch; then
+            echo "Generated patch is already current."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add patches/pokeruby/emerald-item-parameters.patch
+            git commit -m "Update Emerald item parameter patch"
+            git push
+          fi
 
       - name: Upload generated patch
         uses: actions/upload-artifact@v4
