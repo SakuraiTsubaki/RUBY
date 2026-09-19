@@ -41,6 +41,9 @@ jobs:
           grep -q '#define ITEMS_COUNT 377' pokeruby/include/constants/items.h
           grep -q 'ItemUseOutOfBattle_ReduceEV' pokeruby/src/data/items_en.h
           grep -q 'gItemEffect_PomegBerry' pokeruby/src/data/pokemon/item_effects.h
+          python3 tools/audit_emerald_item_parameters.py \
+            --ruby pokeruby \
+            --manifest manifests/emerald-item-parameters.json
           test "$(grep -c '\.itemId = ' pokeruby/src/data/items_en.h)" -eq 377
           test "$(grep -c '\.itemId = ' pokeruby/src/data/items_de.h)" -eq 377
 
