@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Install host build dependencies
         run: |
+          grep -RIl 'apt.devkitpro.org' /etc/apt/sources.list /etc/apt/sources.list.d 2>/dev/null \
+            | xargs -r sed -i '/apt.devkitpro.org/d'
           apt-get update
           apt-get install -y libpng-dev pkg-config
 
