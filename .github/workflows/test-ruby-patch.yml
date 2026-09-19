@@ -1,0 +1,80 @@
+name: Build and verify Ruby external-event patch
+
+on:
+  push:
+    paths:
+      - "patches/pokeruby/external-events-always-on.patch"
+      - ".github/workflows/test-ruby-patch.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container:
+      image: devkitpro/devkitarm:latest
+    steps:
+      - name: Fetch project and matching pokeruby toolchain
+        run: |
+          set -euxo pipefail
+          git clone --depth 1 https://github.com/SakuraiTsubaki/RUBY.git ruby-project
+          git clone --depth 1 https://github.com/pret/pokeruby.git pokeruby
+          git clone --depth 1 https://github.com/pret/agbcc.git agbcc
+          (cd agbcc && ./build.sh && ./install.sh ../pokeruby)
+
+      - name: Build clean Ruby v1.0 baseline
+        run: |
+          set -euxo pipefail
+          make -C pokeruby -j2 ruby
+          echo "f28b6ffc97847e94a6c21a63cacf633ee5c8df1e  pokeruby/pokeruby.gba" | sha1sum -c -
+          cp pokeruby/pokeruby.gba baseline.gba
+
+      - name: Apply always-on external-event patch and rebuild
+        run: |
+          set -euxo pipefail
+          git -C pokeruby apply ../ruby-project/patches/pokeruby/external-events-always-on.patch
+          make -C pokeruby clean
+          make -C pokeruby -j2 ruby
+          cp pokeruby/pokeruby.gba patched.gba
+          sha1sum baseline.gba patched.gba
+          cmp -s baseline.gba patched.gba && { echo "ERROR: patched ROM is identical"; exit 1; } || true
+
+      - name: Create IPS delta only
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          a=Path("baseline.gba").read_bytes()
+          b=Path("patched.gba").read_bytes()
+          if len(a) != len(b):
+              raise SystemExit(f"size mismatch: {len(a)} != {len(b)}")
+          out=bytearray(b"PATCH")
+          i=0
+          records=0
+          changed=0
+          while i < len(a):
+              if a[i] == b[i]:
+                  i += 1
+                  continue
+              start=i
+              chunk=bytearray()
+              while i < len(a) and a[i] != b[i] and len(chunk) < 0xFFFF:
+                  chunk.append(b[i]); i += 1
+              if start > 0xFFFFFF:
+                  raise SystemExit(f"IPS offset overflow: {start:#x}")
+              out += start.to_bytes(3,"big")
+              out += len(chunk).to_bytes(2,"big")
+              out += chunk
+              records += 1
+              changed += len(chunk)
+          out += b"EOF"
+          Path("ruby-external-events.ips").write_bytes(out)
+          print(f"IPS records={records} changed_bytes={changed} patch_bytes={len(out)}")
+          PY
+          sha256sum ruby-external-events.ips
+
+      - name: Upload non-ROM test patch
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruby-external-events-ips
+          path: ruby-external-events.ips
+          retention-days: 1
