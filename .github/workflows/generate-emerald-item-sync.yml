@@ -61,7 +61,8 @@ jobs:
           set -euxo pipefail
           mkdir -p patches/pokeruby
           cp emerald-item-parameters.patch patches/pokeruby/emerald-item-parameters.patch
-          if git diff --quiet -- patches/pokeruby/emerald-item-parameters.patch; then
+          if git ls-files --error-unmatch patches/pokeruby/emerald-item-parameters.patch >/dev/null 2>&1 \
+             && git diff --quiet -- patches/pokeruby/emerald-item-parameters.patch; then
             echo "Generated patch is already current."
           else
             git config user.name "github-actions[bot]"
