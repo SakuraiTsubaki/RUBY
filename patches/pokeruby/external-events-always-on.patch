@@ -86,25 +86,82 @@ diff --git a/data/maps/LittlerootTown/scripts.inc b/data/maps/LittlerootTown/scr
 +LittlerootTown_EventScript_EventTicketCourier::
 +	lock
 +	faceplayer
++	msgbox LittlerootTown_Text_EventTicketCourierChoose, MSGBOX_DEFAULT
++	multichoice 12, 0, 73, 0
++	switch VAR_RESULT
++	case 0, LittlerootTown_EventScript_EventTicketCourierEon
++	case 1, LittlerootTown_EventScript_EventTicketCourierAurora
++	case 2, LittlerootTown_EventScript_EventTicketCourierMystic
++	case 3, LittlerootTown_EventScript_EventTicketCourierOldSeaMap
++	case MULTI_B_PRESSED, LittlerootTown_EventScript_EventTicketCourierCancel
++	goto LittlerootTown_EventScript_EventTicketCourierCancel
++
++LittlerootTown_EventScript_EventTicketCourierEon::
 +	checkitem ITEM_EON_TICKET, 1
 +	compare VAR_RESULT, 1
-+	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyDelivered
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierEonAlreadyOwned
 +	checkpcitem ITEM_EON_TICKET, 1
 +	compare VAR_RESULT, 1
-+	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyDelivered
-+	msgbox LittlerootTown_Text_EventTicketCourierDelivery, MSGBOX_DEFAULT
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierEonAlreadyOwned
 +	giveitem ITEM_EON_TICKET
 +	compare VAR_RESULT, 0
 +	goto_if_eq Common_EventScript_ShowBagIsFull
 +	setflag FLAG_SYS_HAS_EON_TICKET
-+	msgbox LittlerootTown_Text_EventTicketCourierExplain, MSGBOX_DEFAULT
++	goto LittlerootTown_EventScript_EventTicketCourierDone
++
++LittlerootTown_EventScript_EventTicketCourierEonAlreadyOwned::
++	@ Repair migrated saves that contain the ticket but lack the original flag.
++	setflag FLAG_SYS_HAS_EON_TICKET
++	goto LittlerootTown_EventScript_EventTicketCourierAlreadyOwned
++
++LittlerootTown_EventScript_EventTicketCourierAurora::
++	checkitem ITEM_AURORA_TICKET, 1
++	compare VAR_RESULT, 1
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyOwned
++	checkpcitem ITEM_AURORA_TICKET, 1
++	compare VAR_RESULT, 1
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyOwned
++	giveitem ITEM_AURORA_TICKET
++	compare VAR_RESULT, 0
++	goto_if_eq Common_EventScript_ShowBagIsFull
++	goto LittlerootTown_EventScript_EventTicketCourierDone
++
++LittlerootTown_EventScript_EventTicketCourierMystic::
++	checkitem ITEM_MYSTIC_TICKET, 1
++	compare VAR_RESULT, 1
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyOwned
++	checkpcitem ITEM_MYSTIC_TICKET, 1
++	compare VAR_RESULT, 1
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyOwned
++	giveitem ITEM_MYSTIC_TICKET
++	compare VAR_RESULT, 0
++	goto_if_eq Common_EventScript_ShowBagIsFull
++	goto LittlerootTown_EventScript_EventTicketCourierDone
++
++LittlerootTown_EventScript_EventTicketCourierOldSeaMap::
++	checkitem ITEM_OLD_SEA_MAP, 1
++	compare VAR_RESULT, 1
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyOwned
++	checkpcitem ITEM_OLD_SEA_MAP, 1
++	compare VAR_RESULT, 1
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyOwned
++	giveitem ITEM_OLD_SEA_MAP
++	compare VAR_RESULT, 0
++	goto_if_eq Common_EventScript_ShowBagIsFull
++	goto LittlerootTown_EventScript_EventTicketCourierDone
++
++LittlerootTown_EventScript_EventTicketCourierAlreadyOwned::
++	msgbox LittlerootTown_Text_EventTicketCourierAlreadyOwned, MSGBOX_DEFAULT
 +	release
 +	end
 +
-+LittlerootTown_EventScript_EventTicketCourierAlreadyDelivered::
-+	@ Also repairs older saves that have the item but not the event flag.
-+	setflag FLAG_SYS_HAS_EON_TICKET
-+	msgbox LittlerootTown_Text_EventTicketCourierAlreadyDelivered, MSGBOX_DEFAULT
++LittlerootTown_EventScript_EventTicketCourierDone::
++	msgbox LittlerootTown_Text_EventTicketCourierDone, MSGBOX_DEFAULT
++	release
++	end
++
++LittlerootTown_EventScript_EventTicketCourierCancel::
++	msgbox LittlerootTown_Text_EventTicketCourierCancel, MSGBOX_DEFAULT
 +	release
 +	end
  
@@ -123,21 +180,134 @@ diff --git a/data/maps/LittlerootTown/text.inc b/data/maps/LittlerootTown/text.i
  	.string "When does PROF. BIRCH spend time\n"
  	.string "at home?$"
 +
-+LittlerootTown_Text_EventTicketCourierDelivery::
-+	.string "I've been waiting for you.\p"
-+	.string "I was asked to deliver this special\n"
-+	.string "TICKET to you.$"
++LittlerootTown_Text_EventTicketCourierChoose::
++	.string "I handle special event deliveries.\p"
++	.string "Which item would you like?$"
 +
-+LittlerootTown_Text_EventTicketCourierExplain::
-+	.string "Keep it safe.\p"
-+	.string "When the time comes, show it at the\n"
-+	.string "ferry terminal in LILYCOVE.$"
++LittlerootTown_Text_EventTicketCourierAlreadyOwned::
++	.string "You already have that event item.\p"
++	.string "Choose another one whenever you like.$"
 +
-+LittlerootTown_Text_EventTicketCourierAlreadyDelivered::
-+	.string "Looks like you still have the special\n"
-+	.string "TICKET I delivered.\p"
-+	.string "Keep it safe.$"
++LittlerootTown_Text_EventTicketCourierDone::
++	.string "Delivery complete.\p"
++	.string "Talk to me again for another event item.$"
++
++LittlerootTown_Text_EventTicketCourierCancel::
++	.string "No problem. Come back whenever you\n"
++	.string "need an event item.$"
  
  LittlerootTown_Text_IfYouGoInGrassPokemonWillJumpOut:: @ 816ACEB
  	.string "If you go in the tall grass at the sides\n"
  	.string "of this road, wild POKéMON will appear.$"
+
+
+diff --git a/include/constants/items.h b/include/constants/items.h
+--- a/include/constants/items.h
++++ b/include/constants/items.h
+@@
+ #define ITEM_SUPER_ROD 264
+ #define ITEM_SS_TICKET 265
+ #define ITEM_CONTEST_PASS 266
+-#define ITEM_10B 267
++#define ITEM_AURORA_TICKET 267
+ #define ITEM_WAILMER_PAIL 268
+@@
+ // Unknown
+-#define ITEM_15B 347
+-#define ITEM_15C 348
++#define ITEM_MYSTIC_TICKET 347
++#define ITEM_OLD_SEA_MAP 348
+ 
+ #define ITEMS_COUNT 349
+
+diff --git a/src/data/items_en.h b/src/data/items_en.h
+--- a/src/data/items_en.h
++++ b/src/data/items_en.h
+@@
+     {
+-        .name = _("????????"),
+-        .itemId = ITEM_NONE,
++        .name = _("AURORA TICKET"),
++        .itemId = ITEM_AURORA_TICKET,
+         .price = 0,
+         .holdEffect = HOLD_EFFECT_NONE,
+         .holdEffectParam = 0,
+         .description = gItemDescription_Dummy,
+-        .importance = 0,
++        .importance = 1,
+         .exitsBagOnUse = 0,
+-        .pocket = POCKET_ITEMS,
++        .pocket = POCKET_KEY_ITEMS,
+         .type = 4,
+         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+         .battleUsage = 0,
+@@
+     {
+-        .name = _("????????"),
+-        .itemId = ITEM_NONE,
++        .name = _("MYSTIC TICKET"),
++        .itemId = ITEM_MYSTIC_TICKET,
+         .price = 0,
+         .holdEffect = HOLD_EFFECT_NONE,
+         .holdEffectParam = 0,
+         .description = gItemDescription_Dummy,
+-        .importance = 0,
++        .importance = 1,
+         .exitsBagOnUse = 0,
+-        .pocket = POCKET_ITEMS,
++        .pocket = POCKET_KEY_ITEMS,
+         .type = 4,
+         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+         .battleUsage = 0,
+@@
+     {
+-        .name = _("????????"),
+-        .itemId = ITEM_NONE,
++        .name = _("OLD SEA MAP"),
++        .itemId = ITEM_OLD_SEA_MAP,
+         .price = 0,
+         .holdEffect = HOLD_EFFECT_NONE,
+         .holdEffectParam = 0,
+         .description = gItemDescription_Dummy,
+-        .importance = 0,
++        .importance = 1,
+         .exitsBagOnUse = 0,
+-        .pocket = POCKET_ITEMS,
++        .pocket = POCKET_KEY_ITEMS,
+         .type = 4,
+         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+         .battleUsage = 0,
+
+diff --git a/src/script_menu.c b/src/script_menu.c
+--- a/src/script_menu.c
++++ b/src/script_menu.c
+@@
+ const struct MenuAction MultichoiceList_72[] =
+ {
+     {OtherText_RedShard, NULL},
+     {OtherText_YellowShard, NULL},
+     {OtherText_BlueShard, NULL},
+     {OtherText_GreenShard, NULL},
+     {gOtherText_CancelNoTerminator, NULL},
+ };
++
++static const u8 sText_EonTicket[] = _("EON TICKET");
++static const u8 sText_AuroraTicket[] = _("AURORA TICKET");
++static const u8 sText_MysticTicket[] = _("MYSTIC TICKET");
++static const u8 sText_OldSeaMap[] = _("OLD SEA MAP");
++
++const struct MenuAction MultichoiceList_73[] =
++{
++    {sText_EonTicket, NULL},
++    {sText_AuroraTicket, NULL},
++    {sText_MysticTicket, NULL},
++    {sText_OldSeaMap, NULL},
++};
+ 
+ const struct MenuAction MultichoiceList_01[] =
+@@
+     {MultichoiceList_70, ARRAY_COUNT(MultichoiceList_70)},
+     {MultichoiceList_71, ARRAY_COUNT(MultichoiceList_71)},
+     {MultichoiceList_72, ARRAY_COUNT(MultichoiceList_72)},
++    {MultichoiceList_73, ARRAY_COUNT(MultichoiceList_73)},
+ };
