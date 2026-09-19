@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "tools/apply_emerald_item_parameters.py"
+      - "tools/audit_emerald_item_parameters.py"
       - "manifests/emerald-item-parameters.json"
       - ".github/workflows/generate-emerald-item-sync.yml"
   workflow_dispatch:
