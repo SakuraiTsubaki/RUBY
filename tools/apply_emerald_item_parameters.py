@@ -181,9 +181,30 @@ def sync_item_table(path: Path, items: list[dict], symbol_to_id: dict[str, int])
     for idx in range(min(349, len(blocks))):
         start, end, block = blocks[idx]
         v = gameplay_values(items[idx], symbol_to_id)
+        changed = False
         for field, value in v.items():
-            block = replace_designator(block, field, value)
-        replacements.append((start, end, block))
+            current_match = re.search(
+                r"(?m)^\\s*\\." + re.escape(field) + r"\\s*=\\s*([^,\\n}]+)",
+                block,
+            )
+            current = current_match.group(1).strip() if current_match else None
+
+            # Preserve Ruby's spelling when it is numerically/semantically
+            # equivalent to Emerald. This keeps the generated patch focused
+            # on real parameter differences rather than cosmetic rewrites.
+            equivalent = current == value
+            if field == "holdEffect" and value == "0" and current == "HOLD_EFFECT_NONE":
+                equivalent = True
+            if field == "holdEffect" and value == "HOLD_EFFECT_HAPPINESS_UP" and current == "HOLD_EFFECT_HAPPINESS_UP":
+                equivalent = True
+            if current is None and value in ("0", "NULL"):
+                equivalent = True
+
+            if not equivalent:
+                block = replace_designator(block, field, value)
+                changed = True
+        if changed:
+            replacements.append((start, end, block))
 
     for start, end, block in reversed(replacements):
         text = text[:start] + block + text[end:]
