@@ -1,0 +1,67 @@
+diff --git a/src/event_data.c b/src/event_data.c
+--- a/src/event_data.c
++++ b/src/event_data.c
+@@
+ void DisableMysteryEvent(void)
+ {
+-    FlagClear(FLAG_SYS_EXDATA_ENABLE);
++    // Always-on external events: this state may no longer be disabled.
++    FlagSet(FLAG_SYS_EXDATA_ENABLE);
+ }
+@@
+ bool32 IsMysteryEventEnabled(void)
+ {
+-    return FlagGet(FLAG_SYS_EXDATA_ENABLE);
++    // A valid save always exposes Mystery Event.  Keep the saved flag for
++    // compatibility with old saves/tools, but do not use it as a gate.
++    return TRUE;
+ }
+
+diff --git a/src/mystery_event_script.c b/src/mystery_event_script.c
+--- a/src/mystery_event_script.c
++++ b/src/mystery_event_script.c
+@@
+ u16 GetRecordMixingGift(void)
+ {
+     struct RecordMixingGiftData *data = &gSaveBlock1.recordMixingGift.data;
+@@
+     else
+     {
+         u16 itemId = data->itemId;
+-        data->quantity--;
+-        if (data->quantity == 0)
+-            ClearRecordMixingGift();
+-        else
+-            gSaveBlock1.recordMixingGift.checksum = CalcRecordMixingGiftChecksum();
+-
++        // External-event permanence: distribution stock never depletes.
++        // The original checksum remains valid because the payload is unchanged.
+         return itemId;
+     }
+ }
+
+diff --git a/data/maps/LilycoveCity_Harbor/scripts.inc b/data/maps/LilycoveCity_Harbor/scripts.inc
+--- a/data/maps/LilycoveCity_Harbor/scripts.inc
++++ b/data/maps/LilycoveCity_Harbor/scripts.inc
+@@
+ LilycoveCity_Harbor_EventScript_FerryAttendantLocationAndBoarding::
+     goto_if_unset FLAG_SYS_GAME_CLEAR, LilycoveCity_Harbor_EventScript_FerryUnavailable
+-    goto_if_set FLAG_ENCOUNTERED_LATIAS_OR_LATIOS, LilycoveCity_Harbor_EventScript_FerryUnavailable
+-    goto_if_unset FLAG_SYS_HAS_EON_TICKET, LilycoveCity_Harbor_EventScript_FerryUnavailable
++    // Southern Island is a permanently available external-event destination.
++    // Encounter completion must not remove access, and external ticket state
++    // must not be required.
++    setflag FLAG_LANDMARK_SOUTHERN_ISLAND
+     msgbox EventTicket_Text_ThatPass, MSGBOX_DEFAULT
+
+diff --git a/data/maps/SouthernIsland_Interior/scripts.inc b/data/maps/SouthernIsland_Interior/scripts.inc
+--- a/data/maps/SouthernIsland_Interior/scripts.inc
++++ b/data/maps/SouthernIsland_Interior/scripts.inc
+@@
+ SouthernIsland_Interior_EventScript_160BA7::
+     goto_if_set FLAG_ENCOUNTERED_LATIAS_OR_LATIOS, SouthernIsland_Interior_EventScript_160C08
+-    goto_if_unset FLAG_SYS_HAS_EON_TICKET, SouthernIsland_Interior_EventScript_160C08
++    // Access is provided by the internal always-on event path, so an external
++    // Eon Ticket flag is no longer a prerequisite for the encounter.
+     setflag FLAG_ENCOUNTERED_LATIAS_OR_LATIOS
+     special ScrSpecial_StartSouthernIslandBattle

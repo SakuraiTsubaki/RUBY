@@ -1,0 +1,69 @@
+{
+  "project": "RUBY",
+  "policy": "external-events-always-on",
+  "reference_priority": ["ja", "ko", "en", "de", "fr", "it", "es"],
+  "semantics": {
+    "availability": "permanent",
+    "external_hardware_required": false,
+    "duplicate_one_time_rewards": false
+  },
+  "engine": {
+    "mystery_event_menu": "always_enabled",
+    "record_mixing_gift_stock": "non_depleting",
+    "southern_island_reentry": "enabled",
+    "southern_island_legendary": "one_time"
+  },
+  "mystery_event_vm_capabilities": [
+    "run_script",
+    "install_ram_script",
+    "set_enigma_berry",
+    "give_ribbon",
+    "give_national_dex",
+    "add_rare_word",
+    "set_record_mixing_gift",
+    "give_pokemon",
+    "add_ereader_trainer",
+    "enable_reset_rtc"
+  ],
+  "catalog": {
+    "eon_ticket": {
+      "destination": "Southern Island",
+      "external_gate_removed": true,
+      "payload_embedding": "required"
+    },
+    "ereader_berries": {
+      "payload_embedding": "required",
+      "entries": [
+        "Pumkin",
+        "Drash",
+        "Eggant",
+        "Strib",
+        "Chilan",
+        "Nutpea",
+        "Ginema",
+        "Kuo",
+        "Yago",
+        "Touga",
+        "Niniku",
+        "Topo"
+      ]
+    },
+    "battle_e_trainers": {
+      "payload_embedding": "required",
+      "sets": ["Series 1", "Series 2", "Promotional"]
+    },
+    "decoration_present": {
+      "payload_embedding": "required",
+      "entries": ["Regirock Doll", "Regice Doll", "Registeel Doll"]
+    },
+    "berry_program_update": {
+      "mode": "compatibility_repair",
+      "payload_embedding": "required"
+    },
+    "event_pokemon_and_ribbons": {
+      "scope": "official Ruby-compatible external distributions",
+      "payload_embedding": "required",
+      "status": "catalogue_and_verify"
+    }
+  }
+}
