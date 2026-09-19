@@ -1,0 +1,391 @@
+{
+  "project": "RUBY",
+  "reference": "Japanese Ruby/Sapphire e-Reader RAW archive",
+  "repository": "Alectardy98/PokemonRS-Ereader-Saves",
+  "verification_method": "tools/ereader_payload_extract.py rules; RAW deinterleave + VPK0 decode + pokeruby payload checksums",
+  "berries": [
+    {
+      "id": "K007",
+      "name": "Ginema",
+      "source_blob_sha": "57cb1309a2c73cfe30535a0a874f2e302d79ba77",
+      "raw_size": 2912,
+      "decoded_size": 3663,
+      "payload_offset": "0x4EA",
+      "payload_size": "0x530",
+      "stored_checksum": "0x00006C65",
+      "valid_candidates": 1
+    },
+    {
+      "id": "K008",
+      "name": "Kuo",
+      "source_blob_sha": "35df688e65f7a75668971be50b0115395114b4b1",
+      "raw_size": 2912,
+      "decoded_size": 3663,
+      "payload_offset": "0x4EA",
+      "payload_size": "0x530",
+      "stored_checksum": "0x0001044E",
+      "valid_candidates": 1
+    },
+    {
+      "id": "K009",
+      "name": "Yago",
+      "source_blob_sha": "27f99d126dc0f7e17970ababfd0d87cee392a49b",
+      "raw_size": 2912,
+      "decoded_size": 3663,
+      "payload_offset": "0x4EA",
+      "payload_size": "0x530",
+      "stored_checksum": "0x00009B71",
+      "valid_candidates": 1
+    },
+    {
+      "id": "K010",
+      "name": "Touga",
+      "source_blob_sha": "583a8591943d0e1878f331e93c4e355643352960",
+      "raw_size": 2912,
+      "decoded_size": 3663,
+      "payload_offset": "0x4EA",
+      "payload_size": "0x530",
+      "stored_checksum": "0x00007547",
+      "valid_candidates": 1
+    },
+    {
+      "id": "K011",
+      "name": "Niniku",
+      "source_blob_sha": "9861f9e625d1c57e98b8d8ec6a4e8fe193175eaf",
+      "raw_size": 2912,
+      "decoded_size": 3663,
+      "payload_offset": "0x4EA",
+      "payload_size": "0x530",
+      "stored_checksum": "0x00010824",
+      "valid_candidates": 1
+    },
+    {
+      "id": "K012",
+      "name": "Topo",
+      "source_blob_sha": "1b8d6fc4efb126822a409419bcac004808065066",
+      "raw_size": 2912,
+      "decoded_size": 3663,
+      "payload_offset": "0x4EA",
+      "payload_size": "0x530",
+      "stored_checksum": "0x00008ADD",
+      "valid_candidates": 1
+    }
+  ],
+  "trainers": [
+    {
+      "id": "N001",
+      "name": "Psychic Teruko",
+      "source_blob_sha": "6b6a201b8a1d4eab02c74795088a90d548d7d991",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0x945DD286",
+      "unk0": 0,
+      "trainer_class": 22,
+      "win_streak": 0,
+      "party_species": [
+        352,
+        178,
+        121
+      ],
+      "party_levels": [
+        78,
+        80,
+        82
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "N002",
+      "name": "Triathlete Kimiko",
+      "source_blob_sha": "82f801155199b6e78e0df659591df76f0ea9f945",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0xCBEC0BC4",
+      "unk0": 0,
+      "trainer_class": 42,
+      "win_streak": 0,
+      "party_species": [
+        297,
+        389,
+        314
+      ],
+      "party_levels": [
+        68,
+        70,
+        72
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "N003",
+      "name": "Gentleman Norton",
+      "source_blob_sha": "da21b740bf6a74b2a5978bb029a695731d32c12f",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0xB2578AC3",
+      "unk0": 0,
+      "trainer_class": 23,
+      "win_streak": 0,
+      "party_species": [
+        321,
+        319,
+        362
+      ],
+      "party_levels": [
+        60,
+        62,
+        64
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "N004",
+      "name": "Guitarist Simon",
+      "source_blob_sha": "a20a6b5db6cf6e75eafff5a0471514c174e14377",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0xD1CFECC9",
+      "unk0": 0,
+      "trainer_class": 17,
+      "win_streak": 0,
+      "party_species": [
+        312,
+        287,
+        397
+      ],
+      "party_levels": [
+        54,
+        57,
+        60
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "N005",
+      "name": "Battle Girl Hozumi",
+      "source_blob_sha": "d4794e813b9012b3095d148c47f3768b719f0734",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0xECE2BD32",
+      "unk0": 50,
+      "trainer_class": 48,
+      "win_streak": 5,
+      "party_species": [
+        365,
+        380,
+        214
+      ],
+      "party_levels": [
+        50,
+        50,
+        50
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "N006",
+      "name": "Lass Ritsue",
+      "source_blob_sha": "227fe7340f498eb88bffd1780ada4a334f96d827",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0xDC4B49C1",
+      "unk0": 0,
+      "trainer_class": 71,
+      "win_streak": 0,
+      "party_species": [
+        289,
+        310,
+        307
+      ],
+      "party_levels": [
+        90,
+        92,
+        94
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "N007",
+      "name": "School Kid Yuuma",
+      "source_blob_sha": "4f5f2497e342a35e127d467b88e88858d160692a",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0xF5F9D541",
+      "unk0": 0,
+      "trainer_class": 29,
+      "win_streak": 0,
+      "party_species": [
+        344,
+        379,
+        202
+      ],
+      "party_levels": [
+        50,
+        52,
+        56
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "N008",
+      "name": "Expert Taisen",
+      "source_blob_sha": "b0985271821f54efe17b32dbc5f78c32fc0827d2",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0xA5565A1C",
+      "unk0": 100,
+      "trainer_class": 34,
+      "win_streak": 5,
+      "party_species": [
+        329,
+        73,
+        285
+      ],
+      "party_levels": [
+        100,
+        100,
+        100
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "P005",
+      "name": "Collector Hidehiko",
+      "source_blob_sha": "e51c888890feb5b666eeaef7d4f9db97a6dcd42d",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0x175A57E0",
+      "unk0": 0,
+      "trainer_class": 56,
+      "win_streak": 0,
+      "party_species": [
+        119,
+        219,
+        307
+      ],
+      "party_levels": [
+        80,
+        79,
+        82
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "P006",
+      "name": "Cool Trainer Yufu",
+      "source_blob_sha": "12ea6630441e20f20430d05042430a38e357e78c",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0xC34A575A",
+      "unk0": 100,
+      "trainer_class": 9,
+      "win_streak": 5,
+      "party_species": [
+        394,
+        214,
+        397
+      ],
+      "party_levels": [
+        100,
+        100,
+        100
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "P007",
+      "name": "Ruin Maniac Sagami",
+      "source_blob_sha": "0ae9eea3be1b640178dbb23543883ed6d61d5087",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0x56565FEC",
+      "unk0": 0,
+      "trainer_class": 4,
+      "win_streak": 0,
+      "party_species": [
+        401,
+        402,
+        403
+      ],
+      "party_levels": [
+        60,
+        70,
+        75
+      ],
+      "valid_candidates": 1
+    },
+    {
+      "id": "P008",
+      "name": "Cool Trainer Mattego (Demo)",
+      "source_blob_sha": "659d3c3cc036ef1b28515fcd3c51b82f67cb3b51",
+      "raw_size": 2912,
+      "decoded_size": 6580,
+      "payload_offset": "0xC08",
+      "payload_size": "0xBC",
+      "stored_checksum": "0xD810D682",
+      "unk0": 0,
+      "trainer_class": 8,
+      "win_streak": 0,
+      "party_species": [
+        277,
+        280,
+        283
+      ],
+      "party_levels": [
+        68,
+        70,
+        72
+      ],
+      "valid_candidates": 1
+    }
+  ],
+  "decoration_present": {
+    "id": "O001",
+    "source_blob_shas": {
+      "strip_1": "623c6ec533353d0192dbab5bc6350a31db46b690",
+      "strip_2": "a8961741b47b6c3bba9023db11e5b26c3c37827a"
+    },
+    "raw_size_each": 2912,
+    "merged_application_size": 3494,
+    "decoded_size": 10043,
+    "verified_scripts": {
+      "regirock": {
+        "decoration_id": 118,
+        "buffer_script_offset": "0x99",
+        "add_script_offset": "0x9D"
+      },
+      "regice": {
+        "decoration_id": 119,
+        "buffer_script_offset": "0x10D",
+        "add_script_offset": "0x111"
+      },
+      "registeel": {
+        "decoration_id": 120,
+        "buffer_script_offset": "0x181",
+        "add_script_offset": "0x185"
+      }
+    }
+  }
+}

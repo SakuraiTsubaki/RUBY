@@ -290,6 +290,33 @@ def find_enigma_berry_payloads(decoded: bytes) -> list[int]:
 def find_ereader_trainer_payloads(decoded: bytes) -> list[int]:
     hits = []
     for off in range(0, len(decoded) - EREADER_TRAINER_SIZE + 1):
+        # The additive checksum alone can have accidental matches inside the
+        # e-Reader program. Filter candidates with stable R/S trainer structure
+        # constraints before accepting the checksum.
+        unk0 = decoded[off]
+        trainer_class = decoded[off + 1]
+        win_streak = int.from_bytes(decoded[off + 2 : off + 4], "little")
+
+        # pokeruby debug code uses trainerClass % 77. Japanese cards observed
+        # here use unk0 0 for direct battles, or 50/100 for tower-style cards.
+        if unk0 not in (0, 50, 100):
+            continue
+        if trainer_class >= 77:
+            continue
+        if win_streak > 100:
+            continue
+
+        valid_party = True
+        for party_index in range(3):
+            mon = off + 0x34 + party_index * 0x2C
+            species = int.from_bytes(decoded[mon : mon + 2], "little")
+            level = decoded[mon + 0x0C]
+            if not (1 <= species <= 411 and 1 <= level <= 100):
+                valid_party = False
+                break
+        if not valid_party:
+            continue
+
         words = [
             _u32le(decoded, off + i * 4)
             for i in range(EREADER_TRAINER_WORDS)
