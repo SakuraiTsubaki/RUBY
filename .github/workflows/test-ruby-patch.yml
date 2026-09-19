@@ -27,7 +27,9 @@ jobs:
       - name: Build clean Ruby v1.0 baseline
         run: |
           set -euxo pipefail
-          make -C pokeruby -j2 ruby
+          make -C pokeruby -f make_tools.mk -j2
+          make -C pokeruby generated
+          make -C pokeruby -j2 ruby NODEP=1
           echo "f28b6ffc97847e94a6c21a63cacf633ee5c8df1e  pokeruby/pokeruby.gba" | sha1sum -c -
           cp pokeruby/pokeruby.gba baseline.gba
 
@@ -36,7 +38,8 @@ jobs:
           set -euxo pipefail
           git -C pokeruby apply ../ruby-project/patches/pokeruby/external-events-always-on.patch
           make -C pokeruby clean
-          make -C pokeruby -j2 ruby
+          make -C pokeruby generated
+          make -C pokeruby -j2 ruby NODEP=1
           cp pokeruby/pokeruby.gba patched.gba
           sha1sum baseline.gba patched.gba
           cmp -s baseline.gba patched.gba && { echo "ERROR: patched ROM is identical"; exit 1; } || true
