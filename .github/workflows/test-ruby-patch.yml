@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-24.04
     container:
       image: devkitpro/devkitarm:latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Fetch project and matching pokeruby toolchain
         run: |
