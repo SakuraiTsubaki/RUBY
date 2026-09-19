@@ -1,7 +1,15 @@
 {
   "project": "RUBY",
   "policy": "external-events-always-on",
-  "reference_priority": ["ja", "ko", "en", "de", "fr", "it", "es"],
+  "reference_priority": [
+    "ja",
+    "ko",
+    "en",
+    "de",
+    "fr",
+    "it",
+    "es"
+  ],
   "semantics": {
     "availability": "permanent",
     "external_hardware_required": false,
@@ -17,57 +25,95 @@
     "lilycove_harbor_original_checks": "preserved",
     "southern_island_original_checks": "preserved"
   },
-  "mystery_event_vm_capabilities": [
-    "run_script",
-    "install_ram_script",
-    "set_enigma_berry",
-    "give_ribbon",
-    "give_national_dex",
-    "add_rare_word",
-    "set_record_mixing_gift",
-    "give_pokemon",
-    "add_ereader_trainer",
-    "enable_reset_rtc"
-  ],
   "catalog": {
     "eon_ticket": {
+      "card_id": "C000",
       "external_distribution_removed": true,
       "delivery": "Norman after game clear",
       "original_harbor_and_island_logic": true
     },
-    "ereader_berries": {
-      "payload_embedding": "required",
-      "entries": [
-        "Pumkin",
-        "Drash",
-        "Eggant",
-        "Strib",
-        "Chilan",
-        "Nutpea",
-        "Ginema",
-        "Kuo",
-        "Yago",
-        "Touga",
-        "Niniku",
-        "Topo"
-      ]
-    },
     "battle_e_trainers": {
-      "payload_embedding": "required",
-      "sets": ["Series 1", "Series 2", "Promotional"]
+      "total_catalogued": 66,
+      "groups": [
+        {
+          "ids": "A001-A048",
+          "region": "USA",
+          "count": 48
+        },
+        {
+          "ids": "B001-B002",
+          "region": "USA promotional",
+          "count": 2
+        },
+        {
+          "ids": "P001-P004",
+          "region": "Australia promotional",
+          "count": 4
+        },
+        {
+          "ids": "N001-N008",
+          "region": "Japan promotional",
+          "count": 8
+        },
+        {
+          "ids": "P005-P008",
+          "region": "Japan promotional/demo",
+          "count": 4
+        }
+      ],
+      "payload_size": "0xBC",
+      "internal_catalog": "pending generation from verified local RAW"
+    },
+    "ereader_berries": {
+      "ids": "K001-K012",
+      "count": 12,
+      "entries": [
+        "K001 Pumkin",
+        "K002 Drash",
+        "K003 Eggant",
+        "K004 Strib",
+        "K005 Chilan",
+        "K006 Nutpea",
+        "K007 Ginema",
+        "K008 Kuo",
+        "K009 Yago",
+        "K010 Touga",
+        "K011 Niniku",
+        "K012 Topo"
+      ],
+      "payload_size": "0x530",
+      "internal_catalog": "pending generation from verified local RAW"
     },
     "decoration_present": {
-      "payload_embedding": "required",
-      "entries": ["Regirock Doll", "Regice Doll", "Registeel Doll"]
+      "card_id": "O001",
+      "strips": 2,
+      "verified_rewards": [
+        "Regirock Doll",
+        "Regice Doll",
+        "Registeel Doll"
+      ],
+      "internal_delivery": "pending"
     },
     "berry_program_update": {
       "mode": "compatibility_repair",
-      "payload_embedding": "required"
+      "status": "separate RTC/berry-fix workstream"
     },
-    "event_pokemon_and_ribbons": {
-      "scope": "official Ruby-compatible external distributions",
-      "payload_embedding": "required",
-      "status": "catalogue_and_verify"
+    "other_mystery_event_vm_payloads": {
+      "capabilities": [
+        "run_script",
+        "install_ram_script",
+        "give_ribbon",
+        "give_national_dex",
+        "add_rare_word",
+        "set_record_mixing_gift",
+        "give_pokemon",
+        "enable_reset_rtc"
+      ],
+      "official_distribution_status": "catalogue and verify before enabling"
     }
+  },
+  "tooling": {
+    "extractor": "tools/ereader_payload_extract.py",
+    "source_manifest": "manifests/ereader-sources.json"
   }
 }

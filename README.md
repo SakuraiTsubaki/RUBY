@@ -12,17 +12,25 @@ Remove external-device / limited-distribution dependency from Ruby while preserv
 - External event availability must not depend on e-Reader, distribution cartridges, record mixing, or a limited distribution counter.
 - Ticket events keep their original game logic: the patch supplies the ticket internally instead of bypassing the ticket checks.
 - One-time story/battle rewards remain one-time unless the original event was repeatable.
-- e-Reader content is embedded into an internal catalog rather than requiring external hardware.
-- Original region/language behavior is preserved where data differs. Japanese is the primary reference, then Korean when applicable, then English, then the remaining official languages.
+- e-Reader content is converted into an internal catalog rather than requiring external hardware.
+- Japanese material is the primary reference; Korean follows when applicable, then English, then other official languages.
 
-## Current engine patch
-
-See:
+## Current work
 
 - `patches/pokeruby/external-events-always-on.patch`
-- `docs/external-events-always-on.md`
+  - Mystery Event always enabled.
+  - Record-mixing event gift stock does not deplete.
+  - Eon Ticket is delivered internally by Norman after game clear.
+  - Original Lilycove Harbor / Southern Island ticket logic is preserved.
+- `tools/ereader_payload_extract.py`
+  - dependency-free RAW -> BIN -> VPK0 decode pipeline.
+  - checksum-based Enigma Berry and Battle-e trainer extraction.
+  - multi-strip Decoration Present inspection.
 - `manifests/external-events.json`
+  - complete current event-work scope.
+- `manifests/ereader-sources.json`
+  - Japanese-first archival/source provenance without vendoring card dumps.
+- `docs/ereader-payload-pipeline.md`
+  - verified extraction details.
 
-The current engine layer makes Mystery Event permanently enabled, makes record-mixing event gifts non-depleting, and delivers the Eon Ticket internally through Norman after game clear while preserving the original Lilycove Harbor and Southern Island checks.
-
-The remaining work is to embed and verify the official e-Reader/event payload catalog so every external event works offline.
+The next implementation layer is the generated internal event catalog and the in-game delivery/selection paths for the 12 e-Reader Berries, all catalogued Battle-e trainers, and all three Regi dolls.

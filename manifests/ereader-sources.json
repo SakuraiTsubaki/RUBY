@@ -1,0 +1,137 @@
+{
+  "project": "RUBY",
+  "purpose": "external-event source provenance and extraction",
+  "priority": [
+    "Japanese original",
+    "Korean official material when applicable",
+    "English",
+    "other official languages"
+  ],
+  "no_card_dumps_vendored": true,
+  "references": {
+    "pokeruby": {
+      "repository": "pret/pokeruby",
+      "role": "target structures, Mystery Event VM, checksums, field script opcodes"
+    },
+    "archival_rs_cards": {
+      "repository": "Alectardy98/PokemonRS-Ereader-Saves",
+      "role": "archival RAW organization and cross-check material",
+      "japanese": {
+        "battle_e_promotional": {
+          "path": "Ereader Creation/Raw/Japan Ruby-Sapphire/Battle e (Jap Only)",
+          "entries": [
+            "N001",
+            "N002",
+            "N003",
+            "N004",
+            "N005",
+            "N006",
+            "N007",
+            "N008",
+            "P005",
+            "P006",
+            "P007",
+            "P008"
+          ],
+          "count": 12
+        },
+        "berries": {
+          "path": "Ereader Creation/Raw/Japan Ruby-Sapphire/Berry (Jap Only)",
+          "entries": [
+            "K007 Ginema",
+            "K008 Kuo",
+            "K009 Yago",
+            "K010 Touga",
+            "K011 Niniku",
+            "K012 Topo"
+          ],
+          "count": 6
+        },
+        "decoration_present": {
+          "path": "Ereader Creation/Raw/Japan Ruby-Sapphire/Decoration Present (JPN)",
+          "card": "O001",
+          "strips": 2,
+          "verified_result": [
+            "Regirock Doll",
+            "Regice Doll",
+            "Registeel Doll"
+          ]
+        }
+      },
+      "english_and_australian": {
+        "battle_e_main": {
+          "path": "Ereader Creation/Raw/English Ruby-Sapphire/Battle e (Main Set)",
+          "range": "A001-A048",
+          "count": 48
+        },
+        "battle_e_promotional": {
+          "path": "Ereader Creation/Raw/English Ruby-Sapphire/Battle e (Promo)",
+          "entries": [
+            "B001",
+            "B002",
+            "P001",
+            "P002",
+            "P003",
+            "P004"
+          ],
+          "count": 6
+        },
+        "eon_ticket": {
+          "path": "Ereader Creation/Raw/English Ruby-Sapphire/Battle e (Promo)/00-C000 RS - Eon Ticket (USA).raw",
+          "card": "C000"
+        },
+        "translated_decoration_present": {
+          "path": "Ereader Creation/Raw/English Ruby-Sapphire/Regi Gift",
+          "card": "O001",
+          "strips": 2,
+          "role": "secondary cross-check only"
+        }
+      }
+    },
+    "additional_berry_crosscheck": {
+      "repository": "DarkwingTori/e-cardCreation",
+      "paths": [
+        "public/cards/BATTLE_FR_DRASH_BERRY.raw",
+        "public/cards/BATTLE_FR_PUMKIN_BERRY.raw",
+        "public/cards/BATTLE_HR_CHILAN_BERRY.raw",
+        "public/cards/BATTLE_HR_EGGANT_BERRY.raw",
+        "public/cards/BATTLE_ID_NUTPEA_BERRY.raw",
+        "public/cards/BATTLE_ID_STRIB_BERRY.raw"
+      ],
+      "entries": [
+        "K001 Pumkin",
+        "K002 Drash",
+        "K003 Eggant",
+        "K004 Strib",
+        "K005 Chilan",
+        "K006 Nutpea"
+      ],
+      "role": "English fallback/cross-check for K001-K006"
+    },
+    "format_crosscheck": {
+      "repository": "irdkwia/pycarde",
+      "role": "independent RAW deinterleave and VPK0 format reference"
+    }
+  },
+  "verified_payload_rules": {
+    "enigma_berry": {
+      "size": "0x530",
+      "checksum": "sum bytes before 0x52C with runtime description pointer fields 0x0C..0x13 treated as zero; compare u32 LE at 0x52C"
+    },
+    "battle_e_trainer": {
+      "size": "0xBC",
+      "checksum": "sum first 46 little-endian u32 words; compare u32 LE at 0xB8"
+    },
+    "decoration_present": {
+      "ids": {
+        "regirock": 118,
+        "regice": 119,
+        "registeel": 120
+      },
+      "script_opcodes": {
+        "bufferdecorationname": "0x81",
+        "adddecoration": "0x4B"
+      }
+    }
+  }
+}
