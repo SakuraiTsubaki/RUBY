@@ -12,7 +12,7 @@ diff --git a/src/event_data.c b/src/event_data.c
  bool32 IsMysteryEventEnabled(void)
  {
 -    return FlagGet(FLAG_SYS_EXDATA_ENABLE);
-+    // A valid save always exposes Mystery Event.  Keep the saved flag for
++    // A valid save always exposes Mystery Event. Keep the saved flag for
 +    // compatibility with old saves/tools, but do not use it as a gate.
 +    return TRUE;
  }
@@ -34,34 +34,39 @@ diff --git a/src/mystery_event_script.c b/src/mystery_event_script.c
 -        else
 -            gSaveBlock1.recordMixingGift.checksum = CalcRecordMixingGiftChecksum();
 -
-+        // External-event permanence: distribution stock never depletes.
-+        // The original checksum remains valid because the payload is unchanged.
++        // External-event permanence: installed distribution stock never
++        // depletes. The payload/checksum remain unchanged.
          return itemId;
      }
  }
 
-diff --git a/data/maps/LilycoveCity_Harbor/scripts.inc b/data/maps/LilycoveCity_Harbor/scripts.inc
---- a/data/maps/LilycoveCity_Harbor/scripts.inc
-+++ b/data/maps/LilycoveCity_Harbor/scripts.inc
+diff --git a/data/maps/PetalburgCity_Gym/scripts.inc b/data/maps/PetalburgCity_Gym/scripts.inc
+--- a/data/maps/PetalburgCity_Gym/scripts.inc
++++ b/data/maps/PetalburgCity_Gym/scripts.inc
 @@
- LilycoveCity_Harbor_EventScript_FerryAttendantLocationAndBoarding::
-     goto_if_unset FLAG_SYS_GAME_CLEAR, LilycoveCity_Harbor_EventScript_FerryUnavailable
--    goto_if_set FLAG_ENCOUNTERED_LATIAS_OR_LATIOS, LilycoveCity_Harbor_EventScript_FerryUnavailable
--    goto_if_unset FLAG_SYS_HAS_EON_TICKET, LilycoveCity_Harbor_EventScript_FerryUnavailable
-+    // Southern Island is a permanently available external-event destination.
-+    // Encounter completion must not remove access, and external ticket state
-+    // must not be required.
-+    setflag FLAG_LANDMARK_SOUTHERN_ISLAND
-     msgbox EventTicket_Text_ThatPass, MSGBOX_DEFAULT
-
-diff --git a/data/maps/SouthernIsland_Interior/scripts.inc b/data/maps/SouthernIsland_Interior/scripts.inc
---- a/data/maps/SouthernIsland_Interior/scripts.inc
-+++ b/data/maps/SouthernIsland_Interior/scripts.inc
-@@
- SouthernIsland_Interior_EventScript_160BA7::
-     goto_if_set FLAG_ENCOUNTERED_LATIAS_OR_LATIOS, SouthernIsland_Interior_EventScript_160C08
--    goto_if_unset FLAG_SYS_HAS_EON_TICKET, SouthernIsland_Interior_EventScript_160C08
-+    // Access is provided by the internal always-on event path, so an external
-+    // Eon Ticket flag is no longer a prerequisite for the encounter.
-     setflag FLAG_ENCOUNTERED_LATIAS_OR_LATIOS
-     special ScrSpecial_StartSouthernIslandBattle
+ PetalburgCity_Gym_EventScript_NormanPostBattle:: @ 815493D
++	call_if_set FLAG_SYS_GAME_CLEAR, PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket
+ 	call PetalburgCity_Gym_EventScript_ShouldGiveEnigmaBerry
+ 	compare VAR_RESULT, 1
+ 	goto_if_eq PetalburgCity_Gym_EventScript_GiveEnigmaBerry
+ 	goto_if_unset FLAG_RECEIVED_TM42, PetalburgCity_Gym_EventScript_GiveFacade2
+ 	goto_if_set FLAG_SYS_GAME_CLEAR, PetalburgCity_Gym_EventScript_NoAmountOfTrainingIsEnough
+ 	msgbox PetalburgCity_Gym_Text_DadGoingToKeepTraining, MSGBOX_DEFAULT
+ 	release
+ 	end
++
++PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket::
++	checkitem ITEM_EON_TICKET, 1
++	compare VAR_RESULT, 1
++	goto_if_eq PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket_Return
++	checkpcitem ITEM_EON_TICKET, 1
++	compare VAR_RESULT, 1
++	goto_if_eq PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket_Return
++	goto_if_set FLAG_ENCOUNTERED_LATIAS_OR_LATIOS, PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket_Return
++	giveitem ITEM_EON_TICKET
++	compare VAR_RESULT, 0
++	goto_if_eq Common_EventScript_ShowBagIsFull
++	setflag FLAG_SYS_HAS_EON_TICKET
++
++PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket_Return::
++	return

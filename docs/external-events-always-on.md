@@ -4,7 +4,7 @@
 
 "Always-on" means that content originally gated by an external distribution mechanism remains obtainable/usable without that external mechanism.
 
-It does **not** mean endlessly duplicating one-time story or legendary rewards. Access remains permanent; one-time reward semantics may remain one-time.
+It does **not** mean bypassing normal in-game rules when simply supplying the original distributed item/data is sufficient.
 
 ## Ruby external-event surfaces
 
@@ -25,24 +25,22 @@ Ruby/Sapphire expose a Mystery Event VM capable of:
 
 The main-menu gate is `FLAG_SYS_EXDATA_ENABLE`. The engine layer changes this from a saved unlock into an invariant: Mystery Event is always enabled.
 
-### Eon Ticket / Southern Island
+### Eon Ticket
 
-Original flow:
+The original Eon Ticket distribution ultimately gives the player `ITEM_EON_TICKET` and sets `FLAG_SYS_HAS_EON_TICKET`. Lilycove Harbor already checks the physical ticket first and then the event flag, and Southern Island already checks the same event state.
 
-1. external Mystery Event payload installs a Norman/Petalburg Gym RAM script;
-2. Norman gives `ITEM_EON_TICKET`;
-3. `FLAG_SYS_HAS_EON_TICKET` gates the Lilycove ferry and Southern Island encounter;
-4. Ruby/Sapphire normally block returning after the encounter.
+Therefore the always-on implementation should **not** bypass the harbor or island scripts.
 
 Always-on flow:
 
-- keep the normal game-clear ferry prerequisite;
-- remove the external Eon Ticket flag from ferry access;
-- remove the Eon Ticket flag from the Southern Island encounter script;
-- keep `FLAG_ENCOUNTERED_LATIAS_OR_LATIOS` for the one-time legendary encounter;
-- do not use the encounter flag to block future ferry trips.
+1. after the game is cleared, talking to Norman runs the internal Eon Ticket delivery check;
+2. if the ticket is already in the Bag or PC, nothing happens;
+3. if the Southern Island legendary encounter is already complete, nothing happens;
+4. otherwise Norman gives `ITEM_EON_TICKET`;
+5. successful delivery sets `FLAG_SYS_HAS_EON_TICKET`;
+6. Lilycove Harbor and Southern Island continue using the original game logic unchanged.
 
-This makes the location permanently accessible without generating duplicate legendary encounters.
+This reproduces the useful result of the external payload without requiring an e-Reader or distribution source.
 
 ### Record-mixing external gifts
 
@@ -52,7 +50,7 @@ Always-on flow:
 
 - validate the gift exactly as before;
 - return the configured item without decrementing the quantity;
-- therefore official event sharing does not expire.
+- therefore an installed official event-sharing payload does not expire.
 
 ### e-Reader Berry catalog
 
@@ -71,16 +69,16 @@ The internal catalog must preserve all 12 Ruby/Sapphire e-Reader Berry payload f
 - Niniku
 - Topo
 
-The payload includes more than an item ID; it replaces the Enigma Berry data structure. Therefore each official payload must be embedded, not approximated as a normal Berry item.
+These replace the Enigma Berry data structure, so their complete payload data must be embedded rather than approximated as ordinary item IDs.
 
 ### Battle-e Trainer catalog
 
-Ruby/Sapphire can receive e-Reader trainer data used in Mossdeep City / Battle Tower related flows.
+Ruby/Sapphire can receive e-Reader trainer data used by the e-Reader trainer battle flow.
 
 Always-on implementation requirement:
 
 - preserve original trainer structures and checksums;
-- expose every preserved Series 1, Series 2, and promotional trainer entry through an internal selector;
+- expose every verified trainer entry through an internal selector;
 - never require e-Reader link mode.
 
 ### Decoration Present
@@ -91,34 +89,27 @@ Embed the original event behavior for:
 - Regice Doll
 - Registeel Doll
 
-These must be granted through normal decoration inventory rules so full-inventory behavior is preserved.
+These must use normal decoration inventory handling.
 
 ### Berry Program Update
 
-Treat the Berry Program Update as a compatibility repair, not a timed event.
+Treat the Berry Program Update as a compatibility repair, not as a timed distribution.
 
 Always-on implementation requirement:
 
 - patched Ruby builds must not regress into the original Berry/RTC calendar failure mode;
-- the repair state must be safe for old saves and new saves;
-- Japanese update behavior is the primary historical reference.
-
-## Implementation layers
-
-1. **Engine permanence** — implemented by the patch in this repository.
-2. **Embedded official payload catalog** — e-Reader Berries, Battle-e Trainers, Decoration Present, Eon Ticket presentation/data.
-3. **Region/revision binding** — Japanese first; then English and all remaining official Ruby revisions.
-4. **ROM patch tables** — exact verified offsets/signatures per clean ROM revision.
-5. **Save migration** — existing saves gain always-on behavior without needing a new game.
+- old and new saves must remain safe;
+- Japanese behavior is the primary historical reference.
 
 ## Verification rules
 
 A completed Ruby build must pass all of these:
 
-- Mystery Event entry is visible on a valid save without entering the old unlock phrase.
-- Disabling the Mystery Event flag cannot hide the entry.
-- Southern Island can be revisited after the legendary encounter.
-- The legendary encounter itself remains one-time unless a separate repeatable-encounter option is intentionally enabled.
+- Mystery Event is available without entering the old unlock phrase.
+- Clearing the Mystery Event saved flag cannot hide the feature.
+- Norman supplies the Eon Ticket internally after game clear when it is absent.
+- Receiving the Eon Ticket sets the original event flag.
+- Lilycove Harbor and Southern Island retain their original checks.
 - Record-mixing event gift quantity does not decrease.
 - All embedded e-Reader Berry payloads validate.
 - All embedded Battle-e trainer payloads validate.

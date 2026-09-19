@@ -5,13 +5,17 @@
   "semantics": {
     "availability": "permanent",
     "external_hardware_required": false,
+    "preserve_original_game_gates_when_possible": true,
     "duplicate_one_time_rewards": false
   },
   "engine": {
     "mystery_event_menu": "always_enabled",
     "record_mixing_gift_stock": "non_depleting",
-    "southern_island_reentry": "enabled",
-    "southern_island_legendary": "one_time"
+    "eon_ticket_delivery": "internal_norman_postgame",
+    "eon_ticket_item": "ITEM_EON_TICKET",
+    "eon_ticket_flag": "FLAG_SYS_HAS_EON_TICKET",
+    "lilycove_harbor_original_checks": "preserved",
+    "southern_island_original_checks": "preserved"
   },
   "mystery_event_vm_capabilities": [
     "run_script",
@@ -27,9 +31,9 @@
   ],
   "catalog": {
     "eon_ticket": {
-      "destination": "Southern Island",
-      "external_gate_removed": true,
-      "payload_embedding": "required"
+      "external_distribution_removed": true,
+      "delivery": "Norman after game clear",
+      "original_harbor_and_island_logic": true
     },
     "ereader_berries": {
       "payload_embedding": "required",
