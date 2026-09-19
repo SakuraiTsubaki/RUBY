@@ -10,7 +10,7 @@ Remove external-device / limited-distribution dependency from Ruby while preserv
 
 - Mystery Event is always enabled for a valid save.
 - External event availability must not depend on e-Reader, distribution cartridges, record mixing, or a limited distribution counter.
-- Ticket events keep their original game logic: the patch supplies the ticket internally instead of bypassing the ticket checks.
+- Ticket events keep the original destination/story gates; an in-game courier supplies the ticket itself.
 - One-time story/battle rewards remain one-time unless the original event was repeatable.
 - e-Reader content is converted into an internal catalog rather than requiring external hardware.
 - Japanese material is the primary reference; Korean follows when applicable, then English, then other official languages.
@@ -20,8 +20,9 @@ Remove external-device / limited-distribution dependency from Ruby while preserv
 - `patches/pokeruby/external-events-always-on.patch`
   - Mystery Event always enabled.
   - Record-mixing event gift stock does not deplete.
-  - Eon Ticket is delivered internally by Norman after game clear.
-  - Original Lilycove Harbor / Southern Island ticket logic is preserved.
+  - A new Littleroot Town courier gives the Eon Ticket directly.
+  - The courier also repairs `FLAG_SYS_HAS_EON_TICKET` if an existing save already owns the ticket.
+  - Original Lilycove Harbor / Southern Island postgame and encounter checks are preserved.
 - `tools/ereader_payload_extract.py`
   - dependency-free RAW -> BIN -> VPK0 decode pipeline.
   - checksum-based Enigma Berry and Battle-e trainer extraction.

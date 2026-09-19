@@ -4,114 +4,68 @@
 
 "Always-on" means that content originally gated by an external distribution mechanism remains obtainable/usable without that external mechanism.
 
-It does **not** mean bypassing normal in-game rules when simply supplying the original distributed item/data is sufficient.
+It does **not** mean bypassing normal in-game story rules when simply supplying the original distributed item/data is sufficient.
 
 ## Ruby external-event surfaces
 
 ### Mystery Event system
 
-Ruby/Sapphire expose a Mystery Event VM capable of:
+Ruby/Sapphire expose a Mystery Event VM capable of running event/RAM scripts, replacing the Enigma Berry payload, awarding ribbons, enabling National Dex, adding rare Easy Chat words, setting record-mixing gifts, giving Pokémon, installing e-Reader trainers, and enabling RTC reset.
 
-- running an event script
-- installing a RAM script
-- replacing the Enigma Berry payload
-- awarding a ribbon
-- enabling National Dex
-- adding a rare Easy Chat word
-- setting a record-mixing gift
-- giving a Pokémon
-- installing an e-Reader/Battle Tower trainer
-- enabling RTC reset
+The main-menu gate is `FLAG_SYS_EXDATA_ENABLE`. The engine layer makes Mystery Event permanently available.
 
-The main-menu gate is `FLAG_SYS_EXDATA_ENABLE`. The engine layer changes this from a saved unlock into an invariant: Mystery Event is always enabled.
+### Eon Ticket — Littleroot courier
 
-### Eon Ticket
+The ticket distribution is separated from the story.
 
-The original Eon Ticket distribution ultimately gives the player `ITEM_EON_TICKET` and sets `FLAG_SYS_HAS_EON_TICKET`. Lilycove Harbor already checks the physical ticket first and then the event flag, and Southern Island already checks the same event state.
+A new NPC is placed in Littleroot Town near Professor Birch's Lab. The courier is present from the beginning of normal town exploration and simply hands over `ITEM_EON_TICKET`.
 
-Therefore the always-on implementation should **not** bypass the harbor or island scripts.
+Flow:
 
-Always-on flow:
+1. talk to the Littleroot courier;
+2. if the Eon Ticket is absent from both Bag and PC, receive one;
+3. successful delivery sets `FLAG_SYS_HAS_EON_TICKET`;
+4. if a migrated/older save already has the ticket, talking to the courier repairs the flag instead of creating a duplicate;
+5. Lilycove Harbor and Southern Island remain unchanged.
 
-1. after the game is cleared, talking to Norman runs the internal Eon Ticket delivery check;
-2. if the ticket is already in the Bag or PC, nothing happens;
-3. if the Southern Island legendary encounter is already complete, nothing happens;
-4. otherwise Norman gives `ITEM_EON_TICKET`;
-5. successful delivery sets `FLAG_SYS_HAS_EON_TICKET`;
-6. Lilycove Harbor and Southern Island continue using the original game logic unchanged.
+This intentionally allows the player to possess the ticket early. It does **not** allow early travel to Southern Island because the original Lilycove script still checks `FLAG_SYS_GAME_CLEAR`. The legendary encounter's original one-time check also remains intact.
 
-This reproduces the useful result of the external payload without requiring an e-Reader or distribution source.
+This design minimizes story changes: no Norman/postgame dialogue is replaced, and the external distribution dependency is reduced to a simple in-world courier.
 
 ### Record-mixing external gifts
 
-Original Mystery Event data stores a quantity and `GetRecordMixingGift` decrements it.
-
-Always-on flow:
-
-- validate the gift exactly as before;
-- return the configured item without decrementing the quantity;
-- therefore an installed official event-sharing payload does not expire.
+Installed Mystery Event record-mixing gifts validate normally but their distribution quantity no longer decreases.
 
 ### e-Reader Berry catalog
 
-The internal catalog must preserve all 12 Ruby/Sapphire e-Reader Berry payload families:
+The internal catalog preserves all 12 Ruby/Sapphire e-Reader Berry payload families: Pumkin, Drash, Eggant, Strib, Chilan, Nutpea, Ginema, Kuo, Yago, Touga, Niniku, and Topo.
 
-- Pumkin
-- Drash
-- Eggant
-- Strib
-- Chilan
-- Nutpea
-- Ginema
-- Kuo
-- Yago
-- Touga
-- Niniku
-- Topo
-
-These replace the Enigma Berry data structure, so their complete payload data must be embedded rather than approximated as ordinary item IDs.
+These are complete `struct EnigmaBerry` payloads, not ordinary item IDs.
 
 ### Battle-e Trainer catalog
 
-Ruby/Sapphire can receive e-Reader trainer data used by the e-Reader trainer battle flow.
-
-Always-on implementation requirement:
-
-- preserve original trainer structures and checksums;
-- expose every verified trainer entry through an internal selector;
-- never require e-Reader link mode.
+Preserve the original trainer structures/checksums and expose every verified trainer through an internal selector without requiring e-Reader link mode.
 
 ### Decoration Present
 
-Embed the original event behavior for:
+Preserve the verified O001 rewards:
 
 - Regirock Doll
 - Regice Doll
 - Registeel Doll
 
-These must use normal decoration inventory handling.
-
 ### Berry Program Update
 
-Treat the Berry Program Update as a compatibility repair, not as a timed distribution.
-
-Always-on implementation requirement:
-
-- patched Ruby builds must not regress into the original Berry/RTC calendar failure mode;
-- old and new saves must remain safe;
-- Japanese behavior is the primary historical reference.
+Treat the Berry Program Update as a compatibility repair rather than a timed distribution.
 
 ## Verification rules
 
-A completed Ruby build must pass all of these:
-
-- Mystery Event is available without entering the old unlock phrase.
-- Clearing the Mystery Event saved flag cannot hide the feature.
-- Norman supplies the Eon Ticket internally after game clear when it is absent.
-- Receiving the Eon Ticket sets the original event flag.
-- Lilycove Harbor and Southern Island retain their original checks.
+- Mystery Event remains available without the old unlock phrase.
+- The Littleroot courier gives exactly one Eon Ticket when none is present.
+- A save that already owns the Eon Ticket does not receive a duplicate.
+- Talking to the courier repairs `FLAG_SYS_HAS_EON_TICKET` for migrated saves.
+- Receiving the ticket before game clear does not permit Southern Island travel.
+- Lilycove Harbor keeps the original `FLAG_SYS_GAME_CLEAR`, encounter, item, and event-flag behavior.
 - Record-mixing event gift quantity does not decrease.
-- All embedded e-Reader Berry payloads validate.
-- All embedded Battle-e trainer payloads validate.
-- all three Regi Doll event decorations can be obtained without external hardware.
-- no e-Reader or distribution ROM is required for any catalogued event.
+- Embedded e-Reader Berry and Battle-e trainer payloads validate.
+- all three Regi Doll decorations are obtainable without external hardware.

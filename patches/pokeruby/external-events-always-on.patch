@@ -40,33 +40,104 @@ diff --git a/src/mystery_event_script.c b/src/mystery_event_script.c
      }
  }
 
-diff --git a/data/maps/PetalburgCity_Gym/scripts.inc b/data/maps/PetalburgCity_Gym/scripts.inc
---- a/data/maps/PetalburgCity_Gym/scripts.inc
-+++ b/data/maps/PetalburgCity_Gym/scripts.inc
+diff --git a/data/maps/LittlerootTown/map.json b/data/maps/LittlerootTown/map.json
+--- a/data/maps/LittlerootTown/map.json
++++ b/data/maps/LittlerootTown/map.json
 @@
- PetalburgCity_Gym_EventScript_NormanPostBattle:: @ 815493D
-+	call_if_set FLAG_SYS_GAME_CLEAR, PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket
- 	call PetalburgCity_Gym_EventScript_ShouldGiveEnigmaBerry
- 	compare VAR_RESULT, 1
- 	goto_if_eq PetalburgCity_Gym_EventScript_GiveEnigmaBerry
- 	goto_if_unset FLAG_RECEIVED_TM42, PetalburgCity_Gym_EventScript_GiveFacade2
- 	goto_if_set FLAG_SYS_GAME_CLEAR, PetalburgCity_Gym_EventScript_NoAmountOfTrainingIsEnough
- 	msgbox PetalburgCity_Gym_Text_DadGoingToKeepTraining, MSGBOX_DEFAULT
- 	release
+     {
+       "graphics_id": "OBJ_EVENT_GFX_BOY_2",
+       "x": 14,
+       "y": 17,
+       "elevation": 3,
+       "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+       "movement_range_x": 2,
+       "movement_range_y": 1,
+       "trainer_type": "TRAINER_TYPE_NONE",
+       "trainer_sight_or_berry_tree_id": "0",
+       "script": "LittlerootTown_EventScript_Boy",
+       "flag": "0"
+     },
++    {
++      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
++      "x": 9,
++      "y": 17,
++      "elevation": 3,
++      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
++      "movement_range_x": 0,
++      "movement_range_y": 0,
++      "trainer_type": "TRAINER_TYPE_NONE",
++      "trainer_sight_or_berry_tree_id": "0",
++      "script": "LittlerootTown_EventScript_EventTicketCourier",
++      "flag": "0"
++    },
+     {
+       "graphics_id": "OBJ_EVENT_GFX_MOM",
+       "x": 5,
+       "y": 8,
+
+diff --git a/data/maps/LittlerootTown/scripts.inc b/data/maps/LittlerootTown/scripts.inc
+--- a/data/maps/LittlerootTown/scripts.inc
++++ b/data/maps/LittlerootTown/scripts.inc
+@@
+ LittlerootTown_EventScript_Boy:: @ 814D6D6
+ 	msgbox LittlerootTown_Text_BirchSpendsDaysInLab, MSGBOX_NPC
  	end
 +
-+PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket::
++LittlerootTown_EventScript_EventTicketCourier::
++	lock
++	faceplayer
 +	checkitem ITEM_EON_TICKET, 1
 +	compare VAR_RESULT, 1
-+	goto_if_eq PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket_Return
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyDelivered
 +	checkpcitem ITEM_EON_TICKET, 1
 +	compare VAR_RESULT, 1
-+	goto_if_eq PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket_Return
-+	goto_if_set FLAG_ENCOUNTERED_LATIAS_OR_LATIOS, PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket_Return
++	goto_if_eq LittlerootTown_EventScript_EventTicketCourierAlreadyDelivered
++	msgbox LittlerootTown_Text_EventTicketCourierDelivery, MSGBOX_DEFAULT
 +	giveitem ITEM_EON_TICKET
 +	compare VAR_RESULT, 0
 +	goto_if_eq Common_EventScript_ShowBagIsFull
 +	setflag FLAG_SYS_HAS_EON_TICKET
++	msgbox LittlerootTown_Text_EventTicketCourierExplain, MSGBOX_DEFAULT
++	release
++	end
 +
-+PetalburgCity_Gym_EventScript_GiveAlwaysOnEonTicket_Return::
-+	return
++LittlerootTown_EventScript_EventTicketCourierAlreadyDelivered::
++	@ Also repairs older saves that have the item but not the event flag.
++	setflag FLAG_SYS_HAS_EON_TICKET
++	msgbox LittlerootTown_Text_EventTicketCourierAlreadyDelivered, MSGBOX_DEFAULT
++	release
++	end
+ 
+ LittlerootTown_EventScript_Twin:: @ 814D6DF
+ 	lock
+ 	faceplayer
+
+diff --git a/data/maps/LittlerootTown/text.inc b/data/maps/LittlerootTown/text.inc
+--- a/data/maps/LittlerootTown/text.inc
++++ b/data/maps/LittlerootTown/text.inc
+@@
+ LittlerootTown_Text_BirchSpendsDaysInLab:: @ 816AC56
+ 	.string "PROF. BIRCH spends days in his LAB\n"
+ 	.string "studying, then he'll suddenly go out in\l"
+ 	.string "the wild to do more research...\p"
+ 	.string "When does PROF. BIRCH spend time\n"
+ 	.string "at home?$"
++
++LittlerootTown_Text_EventTicketCourierDelivery::
++	.string "I've been waiting for you.\p"
++	.string "I was asked to deliver this special\n"
++	.string "TICKET to you.$"
++
++LittlerootTown_Text_EventTicketCourierExplain::
++	.string "Keep it safe.\p"
++	.string "When the time comes, show it at the\n"
++	.string "ferry terminal in LILYCOVE.$"
++
++LittlerootTown_Text_EventTicketCourierAlreadyDelivered::
++	.string "Looks like you still have the special\n"
++	.string "TICKET I delivered.\p"
++	.string "Keep it safe.$"
+ 
+ LittlerootTown_Text_IfYouGoInGrassPokemonWillJumpOut:: @ 816ACEB
+ 	.string "If you go in the tall grass at the sides\n"
+ 	.string "of this road, wild POKéMON will appear.$"

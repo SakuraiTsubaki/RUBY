@@ -19,17 +19,27 @@
   "engine": {
     "mystery_event_menu": "always_enabled",
     "record_mixing_gift_stock": "non_depleting",
-    "eon_ticket_delivery": "internal_norman_postgame",
+    "eon_ticket_delivery": "littleroot_town_courier",
+    "eon_ticket_delivery_timing": "available_during_early_game",
     "eon_ticket_item": "ITEM_EON_TICKET",
     "eon_ticket_flag": "FLAG_SYS_HAS_EON_TICKET",
+    "eon_ticket_duplicate_guard": "bag_or_pc_item_presence",
+    "eon_ticket_flag_repair": true,
     "lilycove_harbor_original_checks": "preserved",
-    "southern_island_original_checks": "preserved"
+    "southern_island_original_checks": "preserved",
+    "southern_island_usage_gate": "postgame"
   },
   "catalog": {
     "eon_ticket": {
       "card_id": "C000",
       "external_distribution_removed": true,
-      "delivery": "Norman after game clear",
+      "delivery": "new NPC in Littleroot Town",
+      "npc_graphics": "OBJ_EVENT_GFX_MAN_1",
+      "npc_position": {
+        "x": 9,
+        "y": 17,
+        "elevation": 3
+      },
       "original_harbor_and_island_logic": true
     },
     "battle_e_trainers": {
@@ -97,19 +107,6 @@
     "berry_program_update": {
       "mode": "compatibility_repair",
       "status": "separate RTC/berry-fix workstream"
-    },
-    "other_mystery_event_vm_payloads": {
-      "capabilities": [
-        "run_script",
-        "install_ram_script",
-        "give_ribbon",
-        "give_national_dex",
-        "add_rare_word",
-        "set_record_mixing_gift",
-        "give_pokemon",
-        "enable_reset_rtc"
-      ],
-      "official_distribution_status": "catalogue and verify before enabling"
     }
   },
   "tooling": {
