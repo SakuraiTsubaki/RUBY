@@ -1,0 +1,25 @@
+name: Fetch mGBA test binary
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fetch-mgba.yml"
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download official mGBA 0.10.5 Ubuntu Noble build
+        run: |
+          set -euxo pipefail
+          curl -L --fail --retry 3 \
+            -o mGBA-0.10.5-ubuntu64-noble.tar.xz \
+            https://github.com/mgba-emu/mgba/releases/download/0.10.5/mGBA-0.10.5-ubuntu64-noble.tar.xz
+          sha256sum mGBA-0.10.5-ubuntu64-noble.tar.xz
+      - name: Upload mGBA package
+        uses: actions/upload-artifact@v4
+        with:
+          name: mgba-0.10.5-linux
+          path: mGBA-0.10.5-ubuntu64-noble.tar.xz
+          retention-days: 1
