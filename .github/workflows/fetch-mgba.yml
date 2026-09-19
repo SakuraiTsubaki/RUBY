@@ -39,7 +39,7 @@ jobs:
             -DUSE_DISCORD_RPC=OFF \
             -DENABLE_SCRIPTING=OFF
           cmake --build build --target mgba-perf
-          ./build/mgba-perf --version
+          file ./build/mgba-perf
           ldd ./build/mgba-perf || true
           cp ./build/mgba-perf ./mgba-perf-0.10.5
           chmod +x ./mgba-perf-0.10.5
