@@ -16,6 +16,11 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Install host build dependencies
+        run: |
+          apt-get update
+          apt-get install -y libpng-dev pkg-config
+
       - name: Fetch project and matching pokeruby toolchain
         run: |
           set -euxo pipefail
