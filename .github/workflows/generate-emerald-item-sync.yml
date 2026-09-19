@@ -1,0 +1,57 @@
+name: Generate Emerald item parameter sync
+
+on:
+  push:
+    paths:
+      - "tools/apply_emerald_item_parameters.py"
+      - "manifests/emerald-item-parameters.json"
+      - ".github/workflows/generate-emerald-item-sync.yml"
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout RUBY project
+        uses: actions/checkout@v4
+
+      - name: Fetch pinned pret sources
+        run: |
+          set -euxo pipefail
+          git clone https://github.com/pret/pokeruby.git pokeruby
+          git -C pokeruby checkout 63a8cbf0016b351a4e68f7036fa0b77e23d2f2c1
+          git clone https://github.com/pret/pokeemerald.git pokeemerald
+          git -C pokeemerald checkout 5eff78649e7170a877b961ef0b3da13b81a16038
+
+      - name: Apply Emerald item parameters
+        run: |
+          set -euxo pipefail
+          python3 tools/apply_emerald_item_parameters.py \
+            --ruby pokeruby \
+            --manifest manifests/emerald-item-parameters.json
+
+      - name: Validate generated source diff
+        run: |
+          set -euxo pipefail
+          git -C pokeruby diff --check
+          grep -q '#define ITEM_MYSTIC_TICKET 370' pokeruby/include/constants/items.h
+          grep -q '#define ITEM_AURORA_TICKET 371' pokeruby/include/constants/items.h
+          grep -q '#define ITEM_OLD_SEA_MAP 376' pokeruby/include/constants/items.h
+          grep -q '#define ITEMS_COUNT 377' pokeruby/include/constants/items.h
+          grep -q 'ItemUseOutOfBattle_ReduceEV' pokeruby/src/data/items_en.h
+          grep -q 'gItemEffect_PomegBerry' pokeruby/src/data/pokemon/item_effects.h
+          test "$(grep -c '\.itemId = ' pokeruby/src/data/items_en.h)" -eq 377
+          test "$(grep -c '\.itemId = ' pokeruby/src/data/items_de.h)" -eq 377
+
+      - name: Export text patch
+        run: |
+          git -C pokeruby diff --binary > emerald-item-parameters.patch
+          sha256sum emerald-item-parameters.patch
+          wc -l emerald-item-parameters.patch
+
+      - name: Upload generated patch
+        uses: actions/upload-artifact@v4
+        with:
+          name: emerald-item-parameters-patch
+          path: emerald-item-parameters.patch
+          retention-days: 1
