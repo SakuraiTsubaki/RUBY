@@ -25,6 +25,18 @@ The supplied localized ROMs are 16 MiB:
 
 Therefore the expanded RUBY build must **not** depend on whatever padding happens to exist in a localized 16 MiB release. The common expansion path must relink/rebuild into an expanded ROM image and preserve the original per-release ROMs only as verification inputs.
 
+## Expanded ROM container
+
+`patches/pokeruby/gen10-rom-capacity.patch` makes the pokeruby ROM end address configurable while preserving the original 16 MiB default. The RUBY expanded profile builds with:
+
+```text
+ROM_END=0x0A000000
+```
+
+With the cartridge ROM base at `0x08000000`, this produces a 32 MiB expanded container. This is a capacity envelope, not a claim that 32 MiB of content already exists. ROM binaries remain CI-only/local outputs and are not committed.
+
+This avoids depending on the incidental ~1.3 MiB trailing padding observed in the 16 MiB localized retail images and gives the Japanese-origin path the same expansion ceiling.
+
 ## Save findings
 
 Every supplied `.sav` is exactly 128 KiB and matches the Ruby flash-save layout used by the pinned source:
