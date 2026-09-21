@@ -1,0 +1,59 @@
+name: Build Ruby Generation X ROM capacity
+
+on:
+  push:
+    paths:
+      - "patches/pokeruby/gen10-rom-capacity.patch"
+      - "docs/ruby-rom-save-expansion.md"
+      - "manifests/ruby-rom-save-baseline.json"
+      - ".github/workflows/test-gen10-rom-capacity.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container:
+      image: devkitpro/devkitarm:latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout RUBY project
+        uses: actions/checkout@v4
+
+      - name: Install host build dependencies
+        run: |
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            [ -f "$source" ] || continue
+            sed -i '/apt\.devkitpro\.org/d' "$source"
+          done
+          apt-get update
+          apt-get install -y libpng-dev pkg-config
+
+      - name: Fetch pinned pokeruby and agbcc
+        run: |
+          set -euxo pipefail
+          git clone https://github.com/pret/pokeruby.git pokeruby
+          git -C pokeruby checkout 63a8cbf0016b351a4e68f7036fa0b77e23d2f2c1
+          git clone --depth 1 https://github.com/pret/agbcc.git agbcc
+          (cd agbcc && ./build.sh && ./install.sh ../pokeruby)
+
+      - name: Apply ROM capacity patch
+        run: |
+          set -euxo pipefail
+          git -C pokeruby apply --check "$GITHUB_WORKSPACE/patches/pokeruby/gen10-rom-capacity.patch"
+          git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-rom-capacity.patch"
+
+      - name: Build 32 MiB expanded Ruby container
+        run: |
+          set -euxo pipefail
+          make -C pokeruby -f make_tools.mk -j2
+          make -C pokeruby generated
+          make -C pokeruby -j2 ruby NODEP=1 ROM_END=0xA000000
+          test "$(stat -c %s pokeruby/pokeruby.gba)" -eq 33554432
+          test "$(od -An -tu1 -j 188 -N 1 pokeruby/pokeruby.gba | tr -d ' ')" -eq 0
+
+      - name: Verify patch cleanliness
+        run: |
+          set -euxo pipefail
+          git -C pokeruby diff --check
