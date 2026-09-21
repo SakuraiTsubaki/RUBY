@@ -46,6 +46,7 @@ See:
 - `manifests/ruby-rom-save-baseline.json`
 - `tools/analyze_ruby_rom_save.py`
 - `patches/pokeruby/gen10-save-extension.patch`
+- `patches/pokeruby/gen10-mon-metadata-movement.patch`
 
 ## Generation X capacity policy
 
@@ -93,7 +94,7 @@ Ruby's item gameplay parameters are synchronized against the pinned Emerald refe
 1. audit hard-coded Generation III capacity limits;
 2. normalize species/move/item/ability/dex ID representations;
 3. decouple tables and loops from Generation III terminal IDs;
-4. wire the implemented sidecar-v1 transport into party / PC / daycare / link Pokémon metadata operations;
+4. keep the implemented sidecar-v1 metadata synchronized through party / PC / daycare movement; the first movement patch is in place, while expanded-link transport remains pending;
 5. integrate the modern expanded engine profile;
 6. populate official content through Generation IX;
 7. keep the architecture ready for official Generation X data;

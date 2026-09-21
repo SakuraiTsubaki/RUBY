@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PATCHES = [
     ROOT / "patches" / "pokeruby" / "gen10-rom-capacity.patch",
     ROOT / "patches" / "pokeruby" / "gen10-save-extension.patch",
+    ROOT / "patches" / "pokeruby" / "gen10-mon-metadata-movement.patch",
 ]
 
 

@@ -120,7 +120,11 @@ The classic `BoxPokemon` 0x50-byte record and the original checksum regions rema
 
 ## Next implementation work
 
-The save transport is only the first foundation layer. The next work is to wire the 428 extended-mon records into Pokémon movement/copy operations so the metadata follows a Pokémon through party, PC, daycare and link operations. After that, ability IDs and other modern persistent fields can stop depending on Generation III's `altAbility` representation.
+The save transport is the first foundation layer. `patches/pokeruby/gen10-mon-metadata-movement.patch` now adds the first movement layer so the 428 extended-mon records follow ordinary party compaction, PC pickup/place/shift/release operations, SendMonToPC placement, and daycare deposit/withdraw/slot-shift operations.
+
+Expanded-link transfer is intentionally still pending: the vanilla link protocol has no field for the sidecar record, so it needs an explicit expanded-to-expanded negotiation/transport design rather than silently reusing a local slot. Until that protocol is implemented, receiving a legacy-format Pokémon must not be allowed to inherit stale expanded metadata.
+
+After the local movement layer, the next persistence work is expanded-link transport plus runtime use of the 16-bit ability ID and other modern fields so they can stop depending on Generation III's `altAbility` representation.
 
 ROM-side table and ID expansion should proceed in parallel, but must use the Japanese 8 MiB image as the capacity baseline: the project cannot assume the larger localized ROM padding exists.
 

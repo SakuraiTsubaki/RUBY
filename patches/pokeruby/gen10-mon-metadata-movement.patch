@@ -1,0 +1,401 @@
+diff --git a/include/ruby_save_extension.h b/include/ruby_save_extension.h
+--- a/include/ruby_save_extension.h
++++ b/include/ruby_save_extension.h
+@@ -53,4 +53,11 @@
+ void RubySaveExtensionEndLoad(void);
+-void RubySaveExtensionWriteSector(u16 sectionId, u8 *sectorData, u16 chunkSize);
+-
+-#endif // GUARD_RUBY_SAVE_EXTENSION_H
++void RubySaveExtensionWriteSector(u16 sectionId, u8 *sectorData, u16 chunkSize);
++
++struct RubyExtendedMonData *RubySaveExtensionGetPartyMon(u8 slot);
++struct RubyExtendedMonData *RubySaveExtensionGetDaycareMon(u8 slot);
++struct RubyExtendedMonData *RubySaveExtensionGetPcMon(u8 box, u8 slot);
++void RubySaveExtensionClearMonData(struct RubyExtendedMonData *data);
++void RubySaveExtensionCopyMonData(struct RubyExtendedMonData *dest, const struct RubyExtendedMonData *src);
++void RubySaveExtensionMoveMonData(struct RubyExtendedMonData *dest, struct RubyExtendedMonData *src);
++
++#endif // GUARD_RUBY_SAVE_EXTENSION_H
+diff --git a/src/ruby_save_extension.c b/src/ruby_save_extension.c
+--- a/src/ruby_save_extension.c
++++ b/src/ruby_save_extension.c
+@@ -122,4 +122,58 @@
+ 
+-    for (i = 0; i < copySize; i++)
+-        sectorData[chunkSize + i] = extensionData[offset + i];
+-}
++    for (i = 0; i < copySize; i++)
++        sectorData[chunkSize + i] = extensionData[offset + i];
++}
++
++struct RubyExtendedMonData *RubySaveExtensionGetPartyMon(u8 slot)
++{
++    if (slot >= RUBY_EXT_PARTY_COUNT)
++        return NULL;
++    return &gRubySaveExtension.mons[RUBY_EXT_PARTY_BASE + slot];
++}
++
++struct RubyExtendedMonData *RubySaveExtensionGetDaycareMon(u8 slot)
++{
++    if (slot >= RUBY_EXT_DAYCARE_COUNT)
++        return NULL;
++    return &gRubySaveExtension.mons[RUBY_EXT_DAYCARE_BASE + slot];
++}
++
++struct RubyExtendedMonData *RubySaveExtensionGetPcMon(u8 box, u8 slot)
++{
++    if (box >= 14 || slot >= 30)
++        return NULL;
++    return &gRubySaveExtension.mons[RUBY_EXT_PC_BASE + box * 30 + slot];
++}
++
++void RubySaveExtensionClearMonData(struct RubyExtendedMonData *data)
++{
++    u32 i;
++    u8 *bytes;
++
++    if (data == NULL)
++        return;
++
++    bytes = (u8 *)data;
++    for (i = 0; i < sizeof(*data); i++)
++        bytes[i] = 0;
++}
++
++void RubySaveExtensionCopyMonData(struct RubyExtendedMonData *dest, const struct RubyExtendedMonData *src)
++{
++    if (dest == NULL)
++        return;
++    if (src == NULL)
++    {
++        RubySaveExtensionClearMonData(dest);
++        return;
++    }
++    *dest = *src;
++}
++
++void RubySaveExtensionMoveMonData(struct RubyExtendedMonData *dest, struct RubyExtendedMonData *src)
++{
++    if (dest == src)
++        return;
++    RubySaveExtensionCopyMonData(dest, src);
++    RubySaveExtensionClearMonData(src);
++}
+diff --git a/src/pokemon_2.c b/src/pokemon_2.c
+--- a/src/pokemon_2.c
++++ b/src/pokemon_2.c
+@@ -8,4 +8,5 @@
+ #include "main.h"
+-#include "pokemon.h"
+-#include "random.h"
++#include "pokemon.h"
++#include "ruby_save_extension.h"
++#include "random.h"
+ #include "rom_8077ABC.h"
+@@ -979,4 +980,5 @@
+ 
+-    CopyMon(&gPlayerParty[i], mon, sizeof(*mon));
+-    gPlayerPartyCount = i + 1;
++    CopyMon(&gPlayerParty[i], mon, sizeof(*mon));
++    RubySaveExtensionClearMonData(RubySaveExtensionGetPartyMon(i));
++    gPlayerPartyCount = i + 1;
+     return 0;
+@@ -993,8 +995,22 @@
+         {
+-            if (GetBoxMonData(&gPokemonStorage.boxes[i][j], MON_DATA_SPECIES, NULL) == SPECIES_NONE)
+-            {
+-                MonRestorePP(mon);
+-                CopyMon(&gPokemonStorage.boxes[i][j], &mon->box, sizeof(mon->box));
+-                return 1;
+-            }
++            if (GetBoxMonData(&gPokemonStorage.boxes[i][j], MON_DATA_SPECIES, NULL) == SPECIES_NONE)
++            {
++                struct RubyExtendedMonData *destExtension;
++                s32 partySlot;
++
++                MonRestorePP(mon);
++                CopyMon(&gPokemonStorage.boxes[i][j], &mon->box, sizeof(mon->box));
++
++                destExtension = RubySaveExtensionGetPcMon(i, j);
++                for (partySlot = 0; partySlot < PARTY_SIZE; partySlot++)
++                {
++                    if (mon == &gPlayerParty[partySlot])
++                        break;
++                }
++                if (partySlot < PARTY_SIZE)
++                    RubySaveExtensionCopyMonData(destExtension, RubySaveExtensionGetPartyMon(partySlot));
++                else
++                    RubySaveExtensionClearMonData(destExtension);
++                return 1;
++            }
+         }
+diff --git a/src/daycare.c b/src/daycare.c
+--- a/src/daycare.c
++++ b/src/daycare.c
+@@ -12,4 +12,5 @@
+ #include "party_menu.h"
+-#include "pokemon.h"
+-#include "pokemon_storage_system.h"
++#include "pokemon.h"
++#include "pokemon_storage_system.h"
++#include "ruby_save_extension.h"
+ #include "random.h"
+@@ -119,9 +120,20 @@
+ 
+-static void StorePokemonInDaycare(struct Pokemon * mon, struct DayCare * daycare)
+-{
+-    s8 emptySlot;
+-    u8 mail;
+-    u8 *names;
+-
+-    emptySlot = Daycare_FindEmptySpot(daycare->mons);
++static void StorePokemonInDaycare(struct Pokemon * mon, struct DayCare * daycare)
++{
++    s8 emptySlot;
++    s8 partySlot;
++    u8 i;
++    u8 mail;
++    u8 *names;
++
++    emptySlot = Daycare_FindEmptySpot(daycare->mons);
++    partySlot = -1;
++    for (i = 0; i < PARTY_SIZE; i++)
++    {
++        if (mon == &gPlayerParty[i])
++        {
++            partySlot = i;
++            break;
++        }
++    }
+     if (MonHasMail(mon))
+@@ -137,6 +149,10 @@
+ 
+-    daycare->mons[emptySlot] = mon->box;
+-    BoxMonRestorePP(&daycare->mons[emptySlot]);
+-    daycare->misc.countersEtc.steps[emptySlot] = 0;
+-    ZeroMonData(mon);
++    daycare->mons[emptySlot] = mon->box;
++    BoxMonRestorePP(&daycare->mons[emptySlot]);
++    daycare->misc.countersEtc.steps[emptySlot] = 0;
++    if (partySlot >= 0)
++        RubySaveExtensionCopyMonData(RubySaveExtensionGetDaycareMon(emptySlot), RubySaveExtensionGetPartyMon(partySlot));
++    else
++        RubySaveExtensionClearMonData(RubySaveExtensionGetDaycareMon(emptySlot));
++    ZeroMonData(mon);
+     CompactPartySlots();
+@@ -156,6 +172,7 @@
+     {
+-        daycare->mons[0] = daycare->mons[1];
+-        ZeroBoxMonData(&daycare->mons[1]);
+-
+-        daycare->misc.mail[0] = daycare->misc.mail[1];
++        daycare->mons[0] = daycare->mons[1];
++        ZeroBoxMonData(&daycare->mons[1]);
++        RubySaveExtensionMoveMonData(RubySaveExtensionGetDaycareMon(0), RubySaveExtensionGetDaycareMon(1));
++
++        daycare->misc.mail[0] = daycare->misc.mail[1];
+         daycare->misc.countersEtc.steps[0] = daycare->misc.countersEtc.steps[1];
+@@ -216,4 +233,5 @@
+ 
+-    gPlayerParty[PARTY_SIZE - 1] = pokemon;
+-    if (daycare->misc.mail[slot].message.itemId)
++    gPlayerParty[PARTY_SIZE - 1] = pokemon;
++    RubySaveExtensionCopyMonData(RubySaveExtensionGetPartyMon(PARTY_SIZE - 1), RubySaveExtensionGetDaycareMon(slot));
++    if (daycare->misc.mail[slot].message.itemId)
+     {
+@@ -223,5 +241,6 @@
+ 
+-    CompactPartySlots();
+-    ZeroBoxMonData(&daycare->mons[slot]);
+-    daycare->misc.countersEtc.steps[slot] = 0;
++    CompactPartySlots();
++    ZeroBoxMonData(&daycare->mons[slot]);
++    RubySaveExtensionClearMonData(RubySaveExtensionGetDaycareMon(slot));
++    daycare->misc.countersEtc.steps[slot] = 0;
+     ShiftDaycareSlots(daycare);
+diff --git a/src/pokemon_storage_system_4.c b/src/pokemon_storage_system_4.c
+--- a/src/pokemon_storage_system_4.c
++++ b/src/pokemon_storage_system_4.c
+@@ -13,4 +13,5 @@
+ #include "pokemon_summary_screen.h"
+-#include "pokemon_storage_system.h"
+-#include "sound.h"
++#include "pokemon_storage_system.h"
++#include "ruby_save_extension.h"
++#include "sound.h"
+ #include "constants/songs.h"
+@@ -28,4 +29,5 @@
+ 
+-EWRAM_DATA struct Pokemon gUnknown_02038480 = {};
+-#if DEBUG
++EWRAM_DATA struct Pokemon gUnknown_02038480 = {};
++EWRAM_DATA struct RubyExtendedMonData gRubyStorageHeldMonExtension = {0};
++#if DEBUG
+ EWRAM_DATA u8 unk_2038790 = 0;
+@@ -82,6 +84,13 @@
+ void sub_809CA8C(void);
+-void sub_809D0BC(struct UnkStruct_2000028*);
+-void sub_809D1C4(struct UnkStruct_2000028*);
+-
+-// .rodata
++void sub_809D0BC(struct UnkStruct_2000028*);
++void sub_809D1C4(struct UnkStruct_2000028*);
++
++static struct RubyExtendedMonData *GetRubyStorageMonExtension(u8 boxId, u8 position)
++{
++    if (boxId == 14)
++        return RubySaveExtensionGetPartyMon(position);
++    return RubySaveExtensionGetPcMon(boxId, position);
++}
++
++// .rodata
+ 
+@@ -1309,46 +1318,53 @@
+ 
+-void sub_809B44C(u8 a0, u8 a1)
+-{
+-    if (a0 == 14)
+-        gPokemonStorageSystemPtr->unk_25b4 = gPlayerParty[sBoxCursorPosition];
+-    else
+-        ExpandBoxMon(gPokemonStorage.boxes[a0] + a1, &gPokemonStorageSystemPtr->unk_25b4);
+-    sub_809B548(a0, a1);
+-    gUnknown_020384E7 = a0;
+-    gUnknown_020384E8 = a1;
+-}
+-
+-void SetPlacedMonData(u8 boxId, u8 position)
+-{
+-    if (boxId == 14)
+-    {
+-        gPlayerParty[position] = gPokemonStorageSystemPtr->unk_25b4;
+-    }
+-    else
+-    {
+-        BoxMonRestorePP(&gPokemonStorageSystemPtr->unk_25b4.box);
+-        gPokemonStorage.boxes[boxId][position] = gPokemonStorageSystemPtr->unk_25b4.box;
+-    }
+-}
+-
+-void sub_809B548(u8 a0, u8 a1)
+-{
+-    if (a0 == 14)
+-        ZeroMonData(gPlayerParty + a1);
+-    else
+-        ZeroBoxMonData(gPokemonStorage.boxes[a0] + a1);
+-}
+-
+-void SetShiftedMonData(u8 boxId, u8 position)
+-{
+-    if (boxId == 14)
+-        gPokemonStorageSystemPtr->unk_2618 = gPlayerParty[position];
+-    else
+-        ExpandBoxMon(gPokemonStorage.boxes[boxId] + position, &gPokemonStorageSystemPtr->unk_2618);
+-    SetPlacedMonData(boxId, position);
+-    gPokemonStorageSystemPtr->unk_25b4 = gPokemonStorageSystemPtr->unk_2618;
+-    sub_809C04C(&gPokemonStorageSystemPtr->unk_25b4, 0);
+-    gUnknown_020384E7 = boxId;
+-    gUnknown_020384E8 = position;
+-}
++void sub_809B44C(u8 a0, u8 a1)
++{
++    RubySaveExtensionCopyMonData(&gRubyStorageHeldMonExtension, GetRubyStorageMonExtension(a0, a1));
++    if (a0 == 14)
++        gPokemonStorageSystemPtr->unk_25b4 = gPlayerParty[sBoxCursorPosition];
++    else
++        ExpandBoxMon(gPokemonStorage.boxes[a0] + a1, &gPokemonStorageSystemPtr->unk_25b4);
++    sub_809B548(a0, a1);
++    gUnknown_020384E7 = a0;
++    gUnknown_020384E8 = a1;
++}
++
++void SetPlacedMonData(u8 boxId, u8 position)
++{
++    if (boxId == 14)
++    {
++        gPlayerParty[position] = gPokemonStorageSystemPtr->unk_25b4;
++    }
++    else
++    {
++        BoxMonRestorePP(&gPokemonStorageSystemPtr->unk_25b4.box);
++        gPokemonStorage.boxes[boxId][position] = gPokemonStorageSystemPtr->unk_25b4.box;
++    }
++    RubySaveExtensionCopyMonData(GetRubyStorageMonExtension(boxId, position), &gRubyStorageHeldMonExtension);
++}
++
++void sub_809B548(u8 a0, u8 a1)
++{
++    if (a0 == 14)
++        ZeroMonData(gPlayerParty + a1);
++    else
++        ZeroBoxMonData(gPokemonStorage.boxes[a0] + a1);
++    RubySaveExtensionClearMonData(GetRubyStorageMonExtension(a0, a1));
++}
++
++void SetShiftedMonData(u8 boxId, u8 position)
++{
++    struct RubyExtendedMonData shiftedExtension;
++
++    RubySaveExtensionCopyMonData(&shiftedExtension, GetRubyStorageMonExtension(boxId, position));
++    if (boxId == 14)
++        gPokemonStorageSystemPtr->unk_2618 = gPlayerParty[position];
++    else
++        ExpandBoxMon(gPokemonStorage.boxes[boxId] + position, &gPokemonStorageSystemPtr->unk_2618);
++    SetPlacedMonData(boxId, position);
++    gPokemonStorageSystemPtr->unk_25b4 = gPokemonStorageSystemPtr->unk_2618;
++    gRubyStorageHeldMonExtension = shiftedExtension;
++    sub_809C04C(&gPokemonStorageSystemPtr->unk_25b4, 0);
++    gUnknown_020384E7 = boxId;
++    gUnknown_020384E8 = position;
++}
+ 
+@@ -1587,23 +1603,29 @@
+ 
+-s16 CompactPartySlots(void)
+-{
+-    s16 retVal = -1;
+-    u16 i;
+-    u16 last;
+-
+-    for (i = 0, last = 0; i < PARTY_SIZE; i++)
+-    {
+-        if ((u16)GetMonData(gPlayerParty + i, MON_DATA_SPECIES) != SPECIES_NONE)
+-        {
+-            if (i != last)
+-                gPlayerParty[last] = gPlayerParty[i];
+-            last++;
+-        }
+-        else if (retVal == -1)
+-            retVal = i;
+-    }
+-    for (; last < PARTY_SIZE; last++)
+-        ZeroMonData(gPlayerParty + last);
+-    return retVal;
+-}
++s16 CompactPartySlots(void)
++{
++    s16 retVal = -1;
++    u16 i;
++    u16 last;
++
++    for (i = 0, last = 0; i < PARTY_SIZE; i++)
++    {
++        if ((u16)GetMonData(gPlayerParty + i, MON_DATA_SPECIES) != SPECIES_NONE)
++        {
++            if (i != last)
++            {
++                gPlayerParty[last] = gPlayerParty[i];
++                RubySaveExtensionCopyMonData(RubySaveExtensionGetPartyMon(last), RubySaveExtensionGetPartyMon(i));
++            }
++            last++;
++        }
++        else if (retVal == -1)
++            retVal = i;
++    }
++    for (; last < PARTY_SIZE; last++)
++    {
++        ZeroMonData(gPlayerParty + last);
++        RubySaveExtensionClearMonData(RubySaveExtensionGetPartyMon(last));
++    }
++    return retVal;
++}
+ 
