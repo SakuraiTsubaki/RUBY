@@ -233,7 +233,7 @@ diff --git a/src/save.c b/src/save.c
      for (i = 0; i < NUM_SECTORS_PER_SAVE_SLOT; i++)
      {
          DoReadFlashWholeSection(i + sector, gFastSaveSection);
-@@ -481,9 +487,12 @@ static u8 sub_81258BC(u16 a1, const struct SaveBlockChunk *chunks)
+@@ -481,8 +487,11 @@ static u8 sub_81258BC(u16 a1, const struct SaveBlockChunk *chunks)
              u16 j;
              for (j = 0; j < chunks[id].size; j++)
                  chunks[id].data[j] = gFastSaveSection->data[j];
