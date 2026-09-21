@@ -111,3 +111,18 @@ The classic `BoxPokemon` 0x50-byte record and the original checksum regions rema
 The save transport is only the first foundation layer. The next work is to wire the 428 extended-mon records into Pokémon movement/copy operations so the metadata follows a Pokémon through party, PC, daycare and link operations. After that, ability IDs and other modern persistent fields can stop depending on Generation III's `altAbility` representation.
 
 ROM-side table and ID expansion should proceed in parallel, but must use the Japanese 8 MiB image as the capacity baseline: the project cannot assume the larger localized ROM padding exists.
+
+
+## Round-trip verification
+
+`tools/verify_ruby_save_sidecar.py` was run against all 12 supplied Ruby save images. For every save it:
+
+- selected the newest complete rotating slot using the original section IDs/counters;
+- injected a deterministic 6,144-byte synthetic sidecar into the verified gaps;
+- extracted the sidecar back byte-for-byte;
+- confirmed every vanilla logical chunk remained unchanged;
+- recalculated and confirmed every vanilla section checksum remained valid;
+- confirmed every vanilla footer remained unchanged;
+- confirmed sectors 28-31 remained untouched.
+
+All 12 supplied saves passed this in-memory round-trip verification.
