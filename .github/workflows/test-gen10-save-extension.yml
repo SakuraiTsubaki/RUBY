@@ -53,7 +53,7 @@ jobs:
           set -euxo pipefail
           make -C pokeruby -f make_tools.mk -j2
           make -C pokeruby generated
-          make -C pokeruby -j2 ruby NODEP=1
+          make -C pokeruby -j2
           test -s pokeruby/pokeruby.gba
           grep -q 'gRubySaveExtension' pokeruby/pokeruby.map
 
