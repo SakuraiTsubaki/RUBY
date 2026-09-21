@@ -19,6 +19,9 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Checkout RUBY project
+        uses: actions/checkout@v4
+
       - name: Install host build dependencies
         run: |
           for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
