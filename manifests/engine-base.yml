@@ -46,5 +46,9 @@ compatibility:
   preserve_classic_box_pokemon_layout: true
   classic_box_pokemon_size: 0x50
   expanded_packed_box_format_is_not_final: true
-  extended_mon_data_strategy: legacy_sector_gap_sidecar_v1\n  verified_sidecar_gap_bytes_per_slot: 6200\n  sidecar_v1_bytes: 6144\n  sidecar_v1_patch: patches/pokeruby/gen10-save-extension.patch\n  baseline_manifest: manifests/ruby-rom-save-baseline.json
+  extended_mon_data_strategy: legacy_sector_gap_sidecar_v1
+  verified_sidecar_gap_bytes_per_slot: 6200
+  sidecar_v1_bytes: 6144
+  sidecar_v1_patch: patches/pokeruby/gen10-save-extension.patch
+  baseline_manifest: manifests/ruby-rom-save-baseline.json
   do_not_repurpose_legacy_bits_without_migration: true
