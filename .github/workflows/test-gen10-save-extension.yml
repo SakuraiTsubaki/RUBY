@@ -1,0 +1,60 @@
+name: Build Ruby Generation X save extension
+
+on:
+  push:
+    paths:
+      - "patches/pokeruby/gen10-save-extension.patch"
+      - "tools/analyze_ruby_rom_save.py"
+      - "docs/ruby-rom-save-expansion.md"
+      - "manifests/ruby-rom-save-baseline.json"
+      - ".github/workflows/test-gen10-save-extension.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container:
+      image: devkitpro/devkitarm:latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install host build dependencies
+        run: |
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            [ -f "$source" ] || continue
+            sed -i '/apt\.devkitpro\.org/d' "$source"
+          done
+          apt-get update
+          apt-get install -y libpng-dev pkg-config
+
+      - name: Fetch pinned pokeruby and agbcc
+        run: |
+          set -euxo pipefail
+          git clone https://github.com/pret/pokeruby.git pokeruby
+          git -C pokeruby checkout 63a8cbf0016b351a4e68f7036fa0b77e23d2f2c1
+          git clone --depth 1 https://github.com/pret/agbcc.git agbcc
+          (cd agbcc && ./build.sh && ./install.sh ../pokeruby)
+
+      - name: Apply sidecar patch
+        run: |
+          set -euxo pipefail
+          git -C pokeruby apply --check "$GITHUB_WORKSPACE/patches/pokeruby/gen10-save-extension.patch"
+          git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-save-extension.patch"
+          grep -q 'RUBY_SAVE_EXTENSION_SIZE 0x1800' pokeruby/include/ruby_save_extension.h
+          grep -q 'RubySaveExtensionWriteSector' pokeruby/src/save.c
+
+      - name: Build patched Ruby
+        run: |
+          set -euxo pipefail
+          make -C pokeruby -f make_tools.mk -j2
+          make -C pokeruby generated
+          make -C pokeruby -j2 ruby NODEP=1
+          test -s pokeruby/pokeruby.gba
+          grep -q 'gRubySaveExtension' pokeruby/pokeruby.map
+
+      - name: Check repository artifacts
+        run: |
+          set -euxo pipefail
+          python3 "$GITHUB_WORKSPACE/tools/analyze_ruby_rom_save.py" --help >/dev/null
+          git -C pokeruby diff --check
