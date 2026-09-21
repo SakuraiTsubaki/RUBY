@@ -21,10 +21,13 @@ def field_width(text: str, struct_name: str, field: str):
     if not m:
         return None
     body = m.group(1)
-    f = re.search(rf"(?m)^\s*(u8|s8|u16|s16|u32|s32)\s+{re.escape(field)}(?:\[[^\]]+\])?\s*;", body)
-    if not f:
-        return None
-    return {"u8": 8, "s8": 8, "u16": 16, "s16": 16, "u32": 32, "s32": 32}[f.group(1)]
+    f = re.search(rf"(?m)^\s*(?:/\\*.*?\\*/\s*)?(u8|s8|u16|s16|u32|s32)\s+{re.escape(field)}(?:\[[^\]]+\])?\s*;", body)
+    if f:
+        return {"u8": 8, "s8": 8, "u16": 16, "s16": 16, "u32": 32, "s32": 32}[f.group(1)]
+    enum_field = re.search(rf"(?m)^\s*(?:/\\*.*?\\*/\s*)?enum\s+\w+\s+{re.escape(field)}(?:\[[^\]]+\])?\s*;", body)
+    if enum_field:
+        return "enum"
+    return None
 
 
 def inspect_classic(root: Path) -> dict:
@@ -104,10 +107,10 @@ def inspect_expanded(root: Path) -> dict:
             return int(m.group(1)) if m else None
 
         result["persistent_packed_bits"] = {
-            "species": packed_bits(r"enum\\s+Species\\s+species:(\\d+)"),
-            "move": packed_bits(r"enum\\s+Move\\s+move1:(\\d+)"),
-            "heldItem": packed_bits(r"enum\\s+Item\\s+heldItem:(\\d+)"),
-            "abilityNum": packed_bits(r"abilityNum:(\\d+)"),
+            "species": packed_bits(r"enum\s+Species\s+species:(\d+)"),
+            "move": packed_bits(r"enum\s+Move\s+move1:(\d+)"),
+            "heldItem": packed_bits(r"enum\s+Item\s+heldItem:(\d+)"),
+            "abilityNum": packed_bits(r"abilityNum:(\d+)"),
         }
     return result
 
