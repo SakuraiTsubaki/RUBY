@@ -41,7 +41,7 @@ See:
 - `docs/gen10-expansion-foundation.md`
 - `manifests/engine-base.yml`
 - `tools/audit_gen10_capacity.py`
-- `.github/workflows/gen10-capacity-audit.yml`
+- `.github/workflows/gen10-capacity-audit.yml`\n- `docs/ruby-rom-save-expansion.md`\n- `manifests/ruby-rom-save-baseline.json`\n- `tools/analyze_ruby_rom_save.py`\n- `patches/pokeruby/gen10-save-extension.patch`
 
 ## Generation X capacity policy
 
@@ -56,7 +56,7 @@ Target representations:
 - generation IDs: 8-bit;
 - form IDs: 16-bit reserved, with form behavior deferred.
 
-The legacy 0x50-byte Generation III `BoxPokemon` format remains a compatibility boundary. Modern-only persistent data must use a versioned extension/sidecar or an explicitly migrated v2 record rather than silently reinterpreting legacy bits.
+The legacy 0x50-byte Generation III `BoxPokemon` format remains a compatibility boundary. Direct inspection of the supplied 128 KiB saves verified 6,200 bytes of checksum-external zero-filled gap space per rotating main slot. `patches/pokeruby/gen10-save-extension.patch` now reserves 6,144 bytes of that verified space as sidecar v1, without resizing the vanilla record or changing its checksum region.
 
 ## Existing Ruby work
 
@@ -89,7 +89,7 @@ Ruby's item gameplay parameters are synchronized against the pinned Emerald refe
 1. audit hard-coded Generation III capacity limits;
 2. normalize species/move/item/ability/dex ID representations;
 3. decouple tables and loops from Generation III terminal IDs;
-4. design and verify versioned extended save/Pokémon metadata;
+4. wire the implemented sidecar-v1 transport into party / PC / daycare / link Pokémon metadata operations;
 5. integrate the modern expanded engine profile;
 6. populate official content through Generation IX;
 7. keep the architecture ready for official Generation X data;
