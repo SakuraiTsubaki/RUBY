@@ -82,6 +82,12 @@ The goal is not to pre-invent Generation X content. The goal is to ensure that a
 
 ## Save strategy
 
+Direct ROM/save inspection is now part of the design baseline; see `docs/ruby-rom-save-expansion.md` and `manifests/ruby-rom-save-baseline.json`.
+
+The supplied Ruby saves verify **6,200 bytes per rotating main slot** between the logical chunk ends and the vanilla footer at `0xFF4`. Those bytes are outside the original per-chunk checksum. Sidecar v1 uses `0x1800` (6,144) bytes of that verified space and leaves 56 bytes unused.
+
+`patches/pokeruby/gen10-save-extension.patch` already implements the first transport layer: version/header, CRC16, read/write across the 14 logical sections, 428 extended-mon records, and global extension storage. Form ID storage is reserved, but form-change behavior remains deferred.
+
 Do **not** enlarge or reinterpret the legacy 0x50-byte `BoxPokemon` record in-place without a migration boundary.
 
 The compatibility rule is:
@@ -110,10 +116,11 @@ This avoids silently breaking existing Ruby saves while still allowing the expan
    - remove positional assumptions that depend on Gen III terminal IDs;
    - add compile-time/static validation where the toolchain permits it.
 
-4. **Save v2/sidecar layer**
-   - preserve legacy reads;
-   - version new data;
-   - add deterministic migration and rollback tests.
+4. **Save sidecar layer**
+   - sidecar-v1 transport is implemented in `patches/pokeruby/gen10-save-extension.patch`;
+   - preserve legacy reads and vanilla checksum regions;
+   - wire the 428 extended-mon records into party, PC, daycare and link copy/move paths;
+   - add deterministic migration and downgrade-loss tests.
 
 5. **Expanded engine integration**
    - use the pinned expansion engine as the modern mechanics/data reference;
