@@ -41,7 +41,11 @@ See:
 - `docs/gen10-expansion-foundation.md`
 - `manifests/engine-base.yml`
 - `tools/audit_gen10_capacity.py`
-- `.github/workflows/gen10-capacity-audit.yml`\n- `docs/ruby-rom-save-expansion.md`\n- `manifests/ruby-rom-save-baseline.json`\n- `tools/analyze_ruby_rom_save.py`\n- `patches/pokeruby/gen10-save-extension.patch`
+- `.github/workflows/gen10-capacity-audit.yml`
+- `docs/ruby-rom-save-expansion.md`
+- `manifests/ruby-rom-save-baseline.json`
+- `tools/analyze_ruby_rom_save.py`
+- `patches/pokeruby/gen10-save-extension.patch`
 
 ## Generation X capacity policy
 
