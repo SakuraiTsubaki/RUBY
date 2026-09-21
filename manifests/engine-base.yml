@@ -12,6 +12,15 @@ profiles:
     purpose: modern engine donor/reference for Generation X-ready Ruby expansion
     status: foundation
     ruby_content_port: pending
+    donor_persistent_limits:
+      species_bits: 11
+      species_max_encoded: 2047
+      move_bits: 11
+      move_max_encoded: 2047
+      held_item_bits: 10
+      held_item_max_encoded: 1023
+      ability_slot_bits: 2
+      note: these packed BoxPokemon limits must be removed or versioned before the Generation X-ready profile is considered complete
 
 policy:
   priority: capacity-before-forms
@@ -36,5 +45,6 @@ capacity_targets:
 compatibility:
   preserve_classic_box_pokemon_layout: true
   classic_box_pokemon_size: 0x50
+  expanded_packed_box_format_is_not_final: true
   extended_mon_data_strategy: versioned_sidecar_or_v2_record
   do_not_repurpose_legacy_bits_without_migration: true
