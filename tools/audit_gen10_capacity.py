@@ -98,6 +98,17 @@ def inspect_expanded(root: Path) -> dict:
             "BattlePokemon.ability": field_width(text, "BattlePokemon", "ability"),
             "BattlePokemon.item": field_width(text, "BattlePokemon", "item"),
         }
+
+        def packed_bits(field_pattern: str):
+            m = re.search(field_pattern, text)
+            return int(m.group(1)) if m else None
+
+        result["persistent_packed_bits"] = {
+            "species": packed_bits(r"enum\\s+Species\\s+species:(\\d+)"),
+            "move": packed_bits(r"enum\\s+Move\\s+move1:(\\d+)"),
+            "heldItem": packed_bits(r"enum\\s+Item\\s+heldItem:(\\d+)"),
+            "abilityNum": packed_bits(r"abilityNum:(\\d+)"),
+        }
     return result
 
 
