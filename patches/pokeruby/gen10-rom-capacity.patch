@@ -1,0 +1,24 @@
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -108,6 +108,11 @@ endif
+ #### Files ####
+ 
+ ROM := poke$(BUILD_NAME).gba
++# Keep the matching build at the original 16 MiB container by default.
++# RUBY's expanded profile passes ROM_END=0xA000000, which maps the full
++# 32 MiB GBA cartridge ROM window beginning at 0x08000000.
++ROM_END ?= 0x9000000
++
+ MAP := $(ROM:%.gba=%.map)
+ ELF := $(ROM:%.gba=%.elf)
+ SYM := $(ROM:%.gba=%.sym)
+@@ -224,7 +229,7 @@ tidy:
+ 	$(RM) -r build
+ 
+ $(ROM): %.gba: %.elf
+-	$(OBJCOPY) -O binary --gap-fill 0xFF --pad-to 0x9000000 $< $@
++	$(OBJCOPY) -O binary --gap-fill 0xFF --pad-to $(ROM_END) $< $@
+ 	$(GBAFIX) $@ -p --silent
+ 
+ %.elf: $(LD_SCRIPT) $(ALL_OBJECTS)
