@@ -30,6 +30,19 @@ Form changes are explicitly deferred until the core engine can represent future 
 
 The expanded profile does **not** yet mean that Ruby maps/story are fully running on the expansion engine. Ruby content migration is a separate implementation layer.
 
+### Important donor limit
+
+The pinned expansion engine is modern in mechanics, but its persistent Pokémon record is still aggressively bit-packed:
+
+- species: 11 bits (0..2047);
+- each move: 11 bits (0..2047);
+- held item: 10 bits (0..1023);
+- ability slot: 2 bits.
+
+Its runtime `BattlePokemon` uses enum-based species/move/item/ability fields and its species data already supports three ability slots, but the packed `BoxPokemon` representation remains the hard persistence boundary.
+
+Therefore the first expanded-profile engineering milestone is **not form support**. It is a versioned persistent-record extension that removes those 11/11/10-bit content ceilings while retaining deterministic migration from classic Ruby saves.
+
 ## Current Ruby capacity facts
 
 The pinned classic Ruby baseline currently stores:
