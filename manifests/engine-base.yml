@@ -32,6 +32,13 @@ policy:
     - en
     - other_official
 
+rom_capacity:
+  retail_japanese_observed_bytes: 8388608
+  localized_observed_bytes: 16777216
+  expanded_rom_bytes: 33554432
+  expanded_rom_end_address: 0x0A000000
+  patch: patches/pokeruby/gen10-rom-capacity.patch
+
 capacity_targets:
   species_id_bits: 16
   move_id_bits: 16
