@@ -49,7 +49,7 @@ jobs:
           set -euxo pipefail
           make -C pokeruby -f make_tools.mk -j2
           make -C pokeruby generated
-          make -C pokeruby -j2 ruby NODEP=1 ROM_END=0xA000000
+          make -C pokeruby -j2 ROM_END=0xA000000
           test "$(stat -c %s pokeruby/pokeruby.gba)" -eq 33554432
           test "$(od -An -tu1 -j 188 -N 1 pokeruby/pokeruby.gba | tr -d ' ')" -eq 0
 
