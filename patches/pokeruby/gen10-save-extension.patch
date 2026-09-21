@@ -2,7 +2,7 @@ diff --git a/include/ruby_save_extension.h b/include/ruby_save_extension.h
 new file mode 100644
 --- /dev/null
 +++ b/include/ruby_save_extension.h
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,56 @@
 +#ifndef GUARD_RUBY_SAVE_EXTENSION_H
 +#define GUARD_RUBY_SAVE_EXTENSION_H
 +
@@ -63,7 +63,7 @@ diff --git a/src/ruby_save_extension.c b/src/ruby_save_extension.c
 new file mode 100644
 --- /dev/null
 +++ b/src/ruby_save_extension.c
-@@ -0,0 +1,111 @@
+@@ -0,0 +1,125 @@
 +#include "global.h"
 +#include "ruby_save_extension.h"
 +#include "util.h"
