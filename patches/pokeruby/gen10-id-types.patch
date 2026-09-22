@@ -25,7 +25,7 @@ new file mode 100644
 diff --git a/include/ruby_save_extension.h b/include/ruby_save_extension.h
 --- a/include/ruby_save_extension.h
 +++ b/include/ruby_save_extension.h
-@@ -2,10 +2,10 @@
+@@ -2,9 +2,9 @@
  #define GUARD_RUBY_SAVE_EXTENSION_H
  
  #include "global.h"
