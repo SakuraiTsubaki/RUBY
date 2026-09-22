@@ -33,6 +33,14 @@ def field_width(text: str, struct_name: str, field: str):
     return None
 
 
+def bitfield_width(text: str, struct_name: str, field: str):
+    m = re.search(rf"struct\s+(?:__attribute__\(\(packed\)\)\s+)?{re.escape(struct_name)}\s*\{{(.*?)\n\}};", text, re.S)
+    if not m:
+        return None
+    f = re.search(rf"(?m)^\s*(?:u8|s8|u16|s16|u32|s32)\s+{re.escape(field)}:(\d+)\s*;", m.group(1))
+    return int(f.group(1)) if f else None
+
+
 def function_return_width(text: str, name: str):
     m = re.search(rf"(?m)^\s*(u8|s8|u16|s16|u32|s32)\s+{re.escape(name)}\s*\(", text)
     return WIDTHS[m.group(1)] if m else None
@@ -56,6 +64,8 @@ def inspect_classic(root: Path) -> dict:
     pokemon = read(root / "include/pokemon.h")
     battle = read(root / "include/battle.h")
     battle_message = read(root / "include/battle_message.h")
+    pokemon_1 = read(root / "src/pokemon_1.c")
+    pokemon_3 = read(root / "src/pokemon_3.c")
 
     storage_bits = {
         "PokemonSubstruct0.species": field_width(pokemon, "PokemonSubstruct0", "species"),
@@ -74,6 +84,12 @@ def inspect_classic(root: Path) -> dict:
         "GetMonAbility.return": function_return_width(pokemon, "GetMonAbility"),
         "AbilityBattleEffects.ability_arg": function_arg_width(battle, "AbilityBattleEffects", "ability"),
     }
+    learnset_packing = {
+        "LevelUpMove.move": bitfield_width(pokemon, "LevelUpMove", "move"),
+        "LevelUpMove.level": bitfield_width(pokemon, "LevelUpMove", "level"),
+        "0x1FF_mask_refs": pokemon_1.count("gLevelUpLearnsets") and pokemon_1.count("0x1FF") + pokemon_3.count("0x1FF"),
+        "0xFE00_mask_refs": pokemon_1.count("0xFE00") + pokemon_3.count("0xFE00"),
+    }
 
     return {
         "source": str(root),
@@ -85,6 +101,11 @@ def inspect_classic(root: Path) -> dict:
         },
         "storage_bits": storage_bits,
         "function_widths": function_widths,
+        "level_up_learnset_packing": learnset_packing,
+        "move_id_blockers": [
+            "LevelUpMove.move:9",
+            "gLevelUpLearnsets 0x1FF/0xFE00 packing",
+        ],
         "ability_8bit_blockers": sorted(
             [name for name, width in storage_bits.items() if "ability" in name.lower() and width == 8]
             + [name for name, width in function_widths.items() if "ability" in name.lower() and width == 8]

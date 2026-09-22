@@ -38,6 +38,9 @@ jobs:
           grep -q '"StringInfoBattle.lastAbility": 8' gen10-capacity-report.json
           grep -q '"AbilityBattleEffects.ability_arg": 8' gen10-capacity-report.json
           grep -q '"ability_8bit_blockers"' gen10-capacity-report.json
+          grep -q '"LevelUpMove.move": 9' gen10-capacity-report.json
+          grep -q '"0x1FF_mask_refs"' gen10-capacity-report.json
+          grep -q '"move_id_blockers"' gen10-capacity-report.json
 
       - name: Upload non-ROM capacity report
         uses: actions/upload-artifact@v4
