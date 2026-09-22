@@ -47,6 +47,7 @@ See:
 - `tools/analyze_ruby_rom_save.py`
 - `patches/pokeruby/gen10-save-extension.patch`
 - `patches/pokeruby/gen10-mon-metadata-movement.patch`
+- `patches/pokeruby/gen10-save-migration.patch`
 
 ## Generation X capacity policy
 

@@ -147,3 +147,8 @@ All 12 supplied saves passed this in-memory round-trip verification.
 ### Linker integration
 
 The save-extension patch explicitly places `ruby_save_extension.o` text and read-only data in the classic linker script and adds its EWRAM section to `sym_ewram.txt`. The classic pokeruby linker discards sections that are not explicitly listed, so new expansion objects must be registered in all required linker/symbol lists instead of relying on wildcard placement.
+
+
+### Legacy ability migration
+
+`patches/pokeruby/gen10-save-migration.patch` deterministically seeds the 16-bit sidecar ability ID and ability-slot fields from the classic `altAbility` bit after a save is loaded. It covers party, daycare, and all 14×30 PC slots. Existing nonzero sidecar ability IDs are preserved, so later expanded-only abilities are not overwritten by the compatibility migration.

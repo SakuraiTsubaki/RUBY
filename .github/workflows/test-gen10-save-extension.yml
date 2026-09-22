@@ -5,6 +5,7 @@ on:
     paths:
       - "patches/pokeruby/gen10-save-extension.patch"
       - "patches/pokeruby/gen10-mon-metadata-movement.patch"
+      - "patches/pokeruby/gen10-save-migration.patch"
       - "tools/analyze_ruby_rom_save.py"
       - "tools/verify_ruby_save_sidecar.py"
       - "docs/ruby-rom-save-expansion.md"
@@ -48,6 +49,8 @@ jobs:
           git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-save-extension.patch"
           git -C pokeruby apply --check "$GITHUB_WORKSPACE/patches/pokeruby/gen10-mon-metadata-movement.patch"
           git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-mon-metadata-movement.patch"
+          git -C pokeruby apply --check "$GITHUB_WORKSPACE/patches/pokeruby/gen10-save-migration.patch"
+          git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-save-migration.patch"
           grep -q 'RUBY_SAVE_EXTENSION_SIZE 0x1800' pokeruby/include/ruby_save_extension.h
           grep -q 'RubySaveExtensionWriteSector' pokeruby/src/save.c
           grep -q 'src/ruby_save_extension.o(.text)' pokeruby/ld_script.txt
@@ -55,6 +58,8 @@ jobs:
           grep -q 'src/ruby_save_extension.o(ewram_data)' pokeruby/sym_ewram.txt
           grep -q 'RubySaveExtensionGetPcMon' pokeruby/src/ruby_save_extension.c
           grep -q 'gRubyStorageHeldMonExtension' pokeruby/src/pokemon_storage_system_4.c
+          grep -q 'RubySaveExtensionMigrateLegacyMons' pokeruby/src/ruby_save_extension.c
+          grep -q 'RubySaveExtensionMigrateLegacyMons' pokeruby/src/save.c
 
       - name: Build patched Ruby
         run: |

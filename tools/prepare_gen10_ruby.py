@@ -14,6 +14,7 @@ PATCHES = [
     ROOT / "patches" / "pokeruby" / "gen10-rom-capacity.patch",
     ROOT / "patches" / "pokeruby" / "gen10-save-extension.patch",
     ROOT / "patches" / "pokeruby" / "gen10-mon-metadata-movement.patch",
+    ROOT / "patches" / "pokeruby" / "gen10-save-migration.patch",
 ]
 
 

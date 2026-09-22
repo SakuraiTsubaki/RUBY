@@ -1,0 +1,109 @@
+diff --git a/include/ruby_save_extension.h b/include/ruby_save_extension.h
+--- a/include/ruby_save_extension.h
++++ b/include/ruby_save_extension.h
+@@ -58,6 +58,7 @@
+ struct RubyExtendedMonData *RubySaveExtensionGetPcMon(u8 box, u8 slot);
+ void RubySaveExtensionClearMonData(struct RubyExtendedMonData *data);
+ void RubySaveExtensionCopyMonData(struct RubyExtendedMonData *dest, const struct RubyExtendedMonData *src);
+-void RubySaveExtensionMoveMonData(struct RubyExtendedMonData *dest, struct RubyExtendedMonData *src);
+-
+-#endif // GUARD_RUBY_SAVE_EXTENSION_H
++void RubySaveExtensionMoveMonData(struct RubyExtendedMonData *dest, struct RubyExtendedMonData *src);
++void RubySaveExtensionMigrateLegacyMons(void);
++
++#endif // GUARD_RUBY_SAVE_EXTENSION_H
+diff --git a/src/ruby_save_extension.c b/src/ruby_save_extension.c
+--- a/src/ruby_save_extension.c
++++ b/src/ruby_save_extension.c
+@@ -1,6 +1,9 @@
+ #include "global.h"
+-#include "ruby_save_extension.h"
+-#include "util.h"
++#include "ruby_save_extension.h"
++#include "pokemon.h"
++#include "constants/abilities.h"
++#include "constants/species.h"
++#include "util.h"
+ 
+ #define SAVE_SECTION_DATA_END 0xFF4
+ #define SAVE_SECTION_COUNT 14
+@@ -170,10 +173,55 @@
+     *dest = *src;
+ }
+ 
+-void RubySaveExtensionMoveMonData(struct RubyExtendedMonData *dest, struct RubyExtendedMonData *src)
+-{
+-    if (dest == src)
+-        return;
+-    RubySaveExtensionCopyMonData(dest, src);
+-    RubySaveExtensionClearMonData(src);
+-}
++void RubySaveExtensionMoveMonData(struct RubyExtendedMonData *dest, struct RubyExtendedMonData *src)
++{
++    if (dest == src)
++        return;
++    RubySaveExtensionCopyMonData(dest, src);
++    RubySaveExtensionClearMonData(src);
++}
++
++static void MigrateLegacyBoxMonAbility(struct BoxPokemon *boxMon, struct RubyExtendedMonData *extended)
++{
++    u16 species;
++    u8 altAbility;
++
++    if (extended == NULL || extended->abilityId != ABILITY_NONE)
++        return;
++
++    species = GetBoxMonData(boxMon, MON_DATA_SPECIES);
++    if (species == SPECIES_NONE || species >= NUM_SPECIES)
++        return;
++
++    altAbility = GetBoxMonData(boxMon, MON_DATA_ALT_ABILITY);
++    if (altAbility && gBaseStats[species].ability2 != ABILITY_NONE)
++    {
++        extended->abilityId = gBaseStats[species].ability2;
++        extended->abilitySlot = 1;
++    }
++    else
++    {
++        extended->abilityId = gBaseStats[species].ability1;
++        extended->abilitySlot = 0;
++    }
++}
++
++void RubySaveExtensionMigrateLegacyMons(void)
++{
++    u8 partySlot;
++    u8 daycareSlot;
++    u8 box;
++    u8 slot;
++
++    for (partySlot = 0; partySlot < PARTY_SIZE; partySlot++)
++        MigrateLegacyBoxMonAbility(&gPlayerParty[partySlot].box, RubySaveExtensionGetPartyMon(partySlot));
++
++    for (daycareSlot = 0; daycareSlot < RUBY_EXT_DAYCARE_COUNT; daycareSlot++)
++        MigrateLegacyBoxMonAbility(&gSaveBlock1.daycare.mons[daycareSlot], RubySaveExtensionGetDaycareMon(daycareSlot));
++
++    for (box = 0; box < 14; box++)
++    {
++        for (slot = 0; slot < 30; slot++)
++            MigrateLegacyBoxMonAbility(&gPokemonStorage.boxes[box][slot], RubySaveExtensionGetPcMon(box, slot));
++    }
++}
+diff --git a/src/save.c b/src/save.c
+--- a/src/save.c
++++ b/src/save.c
+@@ -504,9 +504,10 @@
+         }
+     }
+ 
+-    RubySaveExtensionEndLoad();
+-
+-    return 1;
++    RubySaveExtensionEndLoad();
++    RubySaveExtensionMigrateLegacyMons();
++
++    return 1;
+ }
+ 
+ static u8 GetSaveValidStatus(const struct SaveBlockChunk *chunks)
