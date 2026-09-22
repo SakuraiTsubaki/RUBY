@@ -1,0 +1,94 @@
+diff --git a/include/ruby_save_extension.h b/include/ruby_save_extension.h
+--- a/include/ruby_save_extension.h
++++ b/include/ruby_save_extension.h
+@@ -3,6 +3,9 @@
+ 
+ #include "global.h"
+ 
++struct BoxPokemon;
++typedef u16 RubyAbilityId;
++
+ #define RUBY_SAVE_EXTENSION_MAGIC 0x58594252 // "RBYX" in little endian
+ #define RUBY_SAVE_EXTENSION_VERSION 1
+ #define RUBY_SAVE_EXTENSION_SIZE 0x1800
+@@ -60,6 +63,10 @@
+ void RubySaveExtensionCopyMonData(struct RubyExtendedMonData *dest, const struct RubyExtendedMonData *src);
+ void RubySaveExtensionMoveMonData(struct RubyExtendedMonData *dest, struct RubyExtendedMonData *src);
+ void RubySaveExtensionMigrateLegacyMons(void);
++RubyAbilityId RubySaveExtensionResolveBoxMonAbility(struct BoxPokemon *boxMon, const struct RubyExtendedMonData *extended);
++RubyAbilityId RubySaveExtensionGetPartyAbility(u8 slot);
++RubyAbilityId RubySaveExtensionGetDaycareAbility(u8 slot);
++RubyAbilityId RubySaveExtensionGetPcAbility(u8 box, u8 slot);
+ 
+ #endif // GUARD_RUBY_SAVE_EXTENSION_H
+diff --git a/src/ruby_save_extension.c b/src/ruby_save_extension.c
+--- a/src/ruby_save_extension.c
++++ b/src/ruby_save_extension.c
+@@ -181,6 +181,52 @@
+     RubySaveExtensionClearMonData(src);
+ }
+ 
++RubyAbilityId RubySaveExtensionResolveBoxMonAbility(struct BoxPokemon *boxMon, const struct RubyExtendedMonData *extended)
++{
++    u16 species;
++    u8 altAbility;
++
++    if (boxMon == NULL)
++        return ABILITY_NONE;
++
++    species = GetBoxMonData(boxMon, MON_DATA_SPECIES);
++    if (species == SPECIES_NONE || species >= NUM_SPECIES)
++        return ABILITY_NONE;
++
++    if (extended != NULL && extended->abilityId != ABILITY_NONE)
++        return extended->abilityId;
++
++    altAbility = GetBoxMonData(boxMon, MON_DATA_ALT_ABILITY);
++    if (altAbility && gBaseStats[species].ability2 != ABILITY_NONE)
++        return gBaseStats[species].ability2;
++    return gBaseStats[species].ability1;
++}
++
++RubyAbilityId RubySaveExtensionGetPartyAbility(u8 slot)
++{
++    if (slot >= PARTY_SIZE)
++        return ABILITY_NONE;
++    return RubySaveExtensionResolveBoxMonAbility(&gPlayerParty[slot].box, RubySaveExtensionGetPartyMon(slot));
++}
++
++RubyAbilityId RubySaveExtensionGetDaycareAbility(u8 slot)
++{
++    if (slot >= RUBY_EXT_DAYCARE_COUNT)
++        return ABILITY_NONE;
++    return RubySaveExtensionResolveBoxMonAbility(&gSaveBlock1.daycare.mons[slot], RubySaveExtensionGetDaycareMon(slot));
++}
++
++RubyAbilityId RubySaveExtensionGetPcAbility(u8 box, u8 slot)
++{
++    if (box >= 14 || slot >= 30)
++        return ABILITY_NONE;
++    return RubySaveExtensionResolveBoxMonAbility(&gPokemonStorage.boxes[box][slot], RubySaveExtensionGetPcMon(box, slot));
++}
++
+ static void MigrateLegacyBoxMonAbility(struct BoxPokemon *boxMon, struct RubyExtendedMonData *extended)
+ {
+     u16 species;
+@@ -194,18 +240,12 @@
+     if (species == SPECIES_NONE || species >= NUM_SPECIES)
+         return;
+ 
++    extended->abilityId = RubySaveExtensionResolveBoxMonAbility(boxMon, NULL);
+     altAbility = GetBoxMonData(boxMon, MON_DATA_ALT_ABILITY);
+     if (altAbility && gBaseStats[species].ability2 != ABILITY_NONE)
+-    {
+-        extended->abilityId = gBaseStats[species].ability2;
+         extended->abilitySlot = 1;
+-    }
+     else
+-    {
+-        extended->abilityId = gBaseStats[species].ability1;
+         extended->abilitySlot = 0;
+-    }
+ }
+ 
+ void RubySaveExtensionMigrateLegacyMons(void)

@@ -152,3 +152,8 @@ The save-extension patch explicitly places `ruby_save_extension.o` text and read
 ### Legacy ability migration
 
 `patches/pokeruby/gen10-save-migration.patch` deterministically seeds the 16-bit sidecar ability ID and ability-slot fields from the classic `altAbility` bit after a save is loaded. It covers party, daycare, and all 14×30 PC slots. Existing nonzero sidecar ability IDs are preserved, so later expanded-only abilities are not overwritten by the compatibility migration.
+
+
+### 16-bit ability ID access layer
+
+`patches/pokeruby/gen10-ability-id-api.patch` introduces `RubyAbilityId` as a 16-bit canonical ability identifier for persistent Ruby Pokémon. Party, daycare, and PC accessors prefer the sidecar ability ID and fall back to the classic species/`altAbility` representation when no expanded value exists. This keeps the legacy `BoxPokemon` ABI intact while giving later battle, UI, link, and data-table work a single 16-bit ability lookup boundary.
