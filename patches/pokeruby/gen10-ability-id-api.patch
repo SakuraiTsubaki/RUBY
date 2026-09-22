@@ -7,13 +7,13 @@ diff --git a/include/ruby_save_extension.h b/include/ruby_save_extension.h
  
 -#include "global.h"
 -
--#define RUBY_SAVE_EXTENSION_MAGIC
+-#define RUBY_SAVE_EXTENSION_MAGIC 0x58594252 // "RBYX" in little endian
 +#include "global.h"
 +
 +struct BoxPokemon;
 +typedef u16 RubyAbilityId;
 +
-+#define RUBY_SAVE_EXTENSION_MAGIC
++#define RUBY_SAVE_EXTENSION_MAGIC 0x58594252 // "RBYX" in little endian
  #define RUBY_SAVE_EXTENSION_VERSION 1
  #define RUBY_SAVE_EXTENSION_SIZE 0x1800
  #define RUBY_SAVE_EXTENSION_HEADER_SIZE 12
