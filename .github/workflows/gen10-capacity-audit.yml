@@ -41,6 +41,9 @@ jobs:
           grep -q '"LevelUpMove.move": 9' gen10-capacity-report.json
           grep -q '"0x1FF_mask_refs"' gen10-capacity-report.json
           grep -q '"move_id_blockers"' gen10-capacity-report.json
+          grep -q '"index_mask": "0x1FF"' gen10-capacity-report.json
+          grep -q '"index_bits": 9' gen10-capacity-report.json
+          grep -q '"easy_chat_id_blockers"' gen10-capacity-report.json
 
       - name: Upload non-ROM capacity report
         uses: actions/upload-artifact@v4

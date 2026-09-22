@@ -66,6 +66,8 @@ def inspect_classic(root: Path) -> dict:
     battle_message = read(root / "include/battle_message.h")
     pokemon_1 = read(root / "src/pokemon_1.c")
     pokemon_3 = read(root / "src/pokemon_3.c")
+    easy_chat = read(root / "include/constants/easy_chat.h")
+    easy_chat_2 = read(root / "src/easy_chat_2.c")
 
     storage_bits = {
         "PokemonSubstruct0.species": field_width(pokemon, "PokemonSubstruct0", "species"),
@@ -90,6 +92,14 @@ def inspect_classic(root: Path) -> dict:
         "0x1FF_mask_refs": pokemon_1.count("gLevelUpLearnsets") and pokemon_1.count("0x1FF") + pokemon_3.count("0x1FF"),
         "0xFE00_mask_refs": pokemon_1.count("0xFE00") + pokemon_3.count("0xFE00"),
     }
+    ec_shift = re.search(r"#define\s+EC_GROUP\(word\)\s+\(\(word\)\s*>>\s*(\d+)\)", easy_chat)
+    ec_mask = re.search(r"#define\s+EC_INDEX\(word\).*?0x([0-9A-Fa-f]+)", easy_chat)
+    easy_chat_packing = {
+        "group_shift_bits": int(ec_shift.group(1)) if ec_shift else None,
+        "index_mask": f"0x{ec_mask.group(1).upper()}" if ec_mask else None,
+        "index_bits": int(ec_mask.group(1), 16).bit_length() if ec_mask else None,
+        "runtime_0x1FF_refs": easy_chat_2.count("0x1FF"),
+    }
 
     return {
         "source": str(root),
@@ -105,6 +115,11 @@ def inspect_classic(root: Path) -> dict:
         "move_id_blockers": [
             "LevelUpMove.move:9",
             "gLevelUpLearnsets 0x1FF/0xFE00 packing",
+        ],
+        "easy_chat_packing": easy_chat_packing,
+        "easy_chat_id_blockers": [
+            "EC move/species index:9",
+            "u16 group/index word",
         ],
         "ability_8bit_blockers": sorted(
             [name for name, width in storage_bits.items() if "ability" in name.lower() and width == 8]

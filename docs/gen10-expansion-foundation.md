@@ -160,3 +160,8 @@ Classic Ruby packs each level-up entry into one 16-bit value: 9 bits for the mov
 ## Random move selection
 
 Classic Ruby's random move selector masks `Random()` with `0x1FF`, limiting selection to the legacy 9-bit move range even if `NUM_MOVES` grows. `patches/pokeruby/gen10-random-move-ids.patch` selects uniformly from the configured `NUM_MOVES - 1` nonzero IDs instead, then preserves the existing forbidden-move filtering. Coordinate/graphics uses of `0x1FF` are unrelated and remain unchanged.
+
+
+## Easy Chat compatibility boundary
+
+Classic Easy Chat encodes a group plus species/move/word index into one `u16`, with a 9-bit index (`0x1FF`). That is a separate compatibility boundary from battle move storage and level-up learnsets. It is now tracked by the capacity audit. Expanding it requires a versioned representation for saved Easy Chat phrases and related Battle Tower/trade text data; the project will not silently widen those saved words and break legacy saves.
