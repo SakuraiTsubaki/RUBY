@@ -155,3 +155,8 @@ This avoids silently breaking existing Ruby saves while still allowing the expan
 ## Level-up move ID width
 
 Classic Ruby packs each level-up entry into one 16-bit value: 9 bits for the move and 7 bits for the level. That caps level-up move IDs at 511 even though Pokémon move slots themselves are 16-bit. `patches/pokeruby/gen10-level-up-move-ids.patch` replaces the packed word with a two-word `[move:u16, level:u16]` entry while retaining the existing `const u16[]` learnset declarations. The learning, reminder/tutor, and initial-moveset readers use explicit accessors instead of `0x1FF`/`0xFE00` masks. This removes the 9-bit learnset bottleneck without changing the legacy BoxPokemon save ABI.
+
+
+## Random move selection
+
+Classic Ruby's random move selector masks `Random()` with `0x1FF`, limiting selection to the legacy 9-bit move range even if `NUM_MOVES` grows. `patches/pokeruby/gen10-random-move-ids.patch` selects uniformly from the configured `NUM_MOVES - 1` nonzero IDs instead, then preserves the existing forbidden-move filtering. Coordinate/graphics uses of `0x1FF` are unrelated and remain unchanged.

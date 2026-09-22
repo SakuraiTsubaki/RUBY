@@ -1,0 +1,16 @@
+diff --git a/src/battle_script_commands.c b/src/battle_script_commands.c
+--- a/src/battle_script_commands.c
++++ b/src/battle_script_commands.c
+@@ -7657,11 +7657,9 @@
+     while (1)
+     {
+         s32 i;
+ 
+-        gCurrentMove = (Random() & 0x1FF) + 1;
+-        if (gCurrentMove >= NUM_MOVES)
+-            continue;
++        gCurrentMove = (Random() % (NUM_MOVES - 1)) + 1;
+         for (i = 0; i < MAX_MON_MOVES; ++i); // redundant
+         i = -1;
+         while (1)
+         {
