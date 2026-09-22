@@ -16,6 +16,9 @@ def macro(text: str, name: str):
     return m.group(1) if m else None
 
 
+WIDTHS = {"u8": 8, "s8": 8, "u16": 16, "s16": 16, "u32": 32, "s32": 32}
+
+
 def field_width(text: str, struct_name: str, field: str):
     m = re.search(rf"struct\s+{re.escape(struct_name)}\s*\{{(.*?)\n\}};", text, re.S)
     if not m:
@@ -23,11 +26,26 @@ def field_width(text: str, struct_name: str, field: str):
     body = m.group(1)
     f = re.search(rf"(?m)^\s*(?:/\\*.*?\\*/\s*)?(u8|s8|u16|s16|u32|s32)\s+{re.escape(field)}(?:\[[^\]]+\])?\s*;", body)
     if f:
-        return {"u8": 8, "s8": 8, "u16": 16, "s16": 16, "u32": 32, "s32": 32}[f.group(1)]
+        return WIDTHS[f.group(1)]
     enum_field = re.search(rf"(?m)^\s*(?:/\\*.*?\\*/\s*)?enum\s+\w+\s+{re.escape(field)}(?:\[[^\]]+\])?\s*;", body)
     if enum_field:
         return "enum"
     return None
+
+
+def function_return_width(text: str, name: str):
+    m = re.search(rf"(?m)^\s*(u8|s8|u16|s16|u32|s32)\s+{re.escape(name)}\s*\(", text)
+    return WIDTHS[m.group(1)] if m else None
+
+
+def function_arg_width(text: str, name: str, arg: str):
+    m = re.search(rf"(?m)^\s*(?:u8|s8|u16|s16|u32|s32|void)\s+{re.escape(name)}\s*\(([^;{{]]*)\)", text)
+    if not m:
+        m = re.search(rf"(?m)^\s*(?:u8|s8|u16|s16|u32|s32|void)\s+{re.escape(name)}\s*\(([^)]*)\)", text)
+    if not m:
+        return None
+    f = re.search(rf"\b(u8|s8|u16|s16|u32|s32)\s+{re.escape(arg)}\b", m.group(1))
+    return WIDTHS[f.group(1)] if f else None
 
 
 def inspect_classic(root: Path) -> dict:
@@ -36,6 +54,26 @@ def inspect_classic(root: Path) -> dict:
     items = read(root / "include/constants/items.h")
     abilities = read(root / "include/constants/abilities.h")
     pokemon = read(root / "include/pokemon.h")
+    battle = read(root / "include/battle.h")
+    battle_message = read(root / "include/battle_message.h")
+
+    storage_bits = {
+        "PokemonSubstruct0.species": field_width(pokemon, "PokemonSubstruct0", "species"),
+        "PokemonSubstruct0.heldItem": field_width(pokemon, "PokemonSubstruct0", "heldItem"),
+        "BaseStats.ability1": field_width(pokemon, "BaseStats", "ability1"),
+        "BaseStats.ability2": field_width(pokemon, "BaseStats", "ability2"),
+        "BattlePokemon.species": field_width(pokemon, "BattlePokemon", "species"),
+        "BattlePokemon.ability": field_width(pokemon, "BattlePokemon", "ability"),
+        "BattlePokemon.item": field_width(pokemon, "BattlePokemon", "item"),
+        "StringInfoBattle.lastAbility": field_width(battle_message, "StringInfoBattle", "lastAbility"),
+        "StringInfoBattle.abilities": field_width(battle_message, "StringInfoBattle", "abilities"),
+        "BattleStruct.abilityPreventingSwitchout": field_width(battle, "BattleStruct", "abilityPreventingSwitchout"),
+    }
+    function_widths = {
+        "GetAbilityBySpecies.return": function_return_width(pokemon, "GetAbilityBySpecies"),
+        "GetMonAbility.return": function_return_width(pokemon, "GetMonAbility"),
+        "AbilityBattleEffects.ability_arg": function_arg_width(battle, "AbilityBattleEffects", "ability"),
+    }
 
     return {
         "source": str(root),
@@ -45,13 +83,12 @@ def inspect_classic(root: Path) -> dict:
             "ITEMS_COUNT": macro(items, "ITEMS_COUNT"),
             "ABILITIES_COUNT": macro(abilities, "ABILITIES_COUNT"),
         },
-        "storage_bits": {
-            "PokemonSubstruct0.species": field_width(pokemon, "PokemonSubstruct0", "species"),
-            "PokemonSubstruct0.heldItem": field_width(pokemon, "PokemonSubstruct0", "heldItem"),
-            "BattlePokemon.species": field_width(pokemon, "BattlePokemon", "species"),
-            "BattlePokemon.ability": field_width(pokemon, "BattlePokemon", "ability"),
-            "BattlePokemon.item": field_width(pokemon, "BattlePokemon", "item"),
-        },
+        "storage_bits": storage_bits,
+        "function_widths": function_widths,
+        "ability_8bit_blockers": sorted(
+            [name for name, width in storage_bits.items() if "ability" in name.lower() and width == 8]
+            + [name for name, width in function_widths.items() if "ability" in name.lower() and width == 8]
+        ),
         "legacy_box_pokemon_size": "0x50",
         "legacy_alt_ability_bits": 1,
     }
