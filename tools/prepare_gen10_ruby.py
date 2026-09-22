@@ -17,6 +17,7 @@ PATCHES = [
     ROOT / "patches" / "pokeruby" / "gen10-save-migration.patch",
     ROOT / "patches" / "pokeruby" / "gen10-ability-id-api.patch",
     ROOT / "patches" / "pokeruby" / "gen10-id-types.patch",
+    ROOT / "patches" / "pokeruby" / "gen10-level-up-move-ids.patch",
 ]
 
 

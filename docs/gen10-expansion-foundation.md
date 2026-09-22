@@ -150,3 +150,8 @@ This avoids silently breaking existing Ruby saves while still allowing the expan
 ## Canonical ID type layer
 
 `patches/pokeruby/gen10-id-types.patch` introduces a single capacity contract for expanded Ruby code: 16-bit species, move, item, ability, Pokédex, and reserved form IDs, plus 8-bit type and generation IDs. These typedefs do not alter the legacy encrypted `BoxPokemon` layout by themselves; they are the migration target for runtime APIs and expanded data tables so width changes are explicit instead of being scattered as raw integer types.
+
+
+## Level-up move ID width
+
+Classic Ruby packs each level-up entry into one 16-bit value: 9 bits for the move and 7 bits for the level. That caps level-up move IDs at 511 even though Pokémon move slots themselves are 16-bit. `patches/pokeruby/gen10-level-up-move-ids.patch` replaces the packed word with a two-word `[move:u16, level:u16]` entry while retaining the existing `const u16[]` learnset declarations. The learning, reminder/tutor, and initial-moveset readers use explicit accessors instead of `0x1FF`/`0xFE00` masks. This removes the 9-bit learnset bottleneck without changing the legacy BoxPokemon save ABI.

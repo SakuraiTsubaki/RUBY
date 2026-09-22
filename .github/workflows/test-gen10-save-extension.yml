@@ -8,6 +8,7 @@ on:
       - "patches/pokeruby/gen10-save-migration.patch"
       - "patches/pokeruby/gen10-ability-id-api.patch"
       - "patches/pokeruby/gen10-id-types.patch"
+      - "patches/pokeruby/gen10-level-up-move-ids.patch"
       - "tools/analyze_ruby_rom_save.py"
       - "tools/verify_ruby_save_sidecar.py"
       - "docs/ruby-rom-save-expansion.md"
@@ -57,6 +58,8 @@ jobs:
           git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-ability-id-api.patch"
           git -C pokeruby apply --check "$GITHUB_WORKSPACE/patches/pokeruby/gen10-id-types.patch"
           git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-id-types.patch"
+          git -C pokeruby apply --check "$GITHUB_WORKSPACE/patches/pokeruby/gen10-level-up-move-ids.patch"
+          git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-level-up-move-ids.patch"
           grep -q 'RUBY_SAVE_EXTENSION_SIZE 0x1800' pokeruby/include/ruby_save_extension.h
           grep -q 'RubySaveExtensionWriteSector' pokeruby/src/save.c
           grep -q 'src/ruby_save_extension.o(.text)' pokeruby/ld_script.txt
@@ -75,6 +78,10 @@ jobs:
           grep -q 'typedef u16 RubyAbilityId' pokeruby/include/ruby_gen10_ids.h
           grep -q 'typedef u16 RubyDexId' pokeruby/include/ruby_gen10_ids.h
           grep -q 'typedef u16 RubyFormId' pokeruby/include/ruby_gen10_ids.h
+          grep -q '#define LEVEL_UP_MOVE(lvl, move) (move), (lvl)' pokeruby/src/data/pokemon/level_up_learnsets.h
+          grep -q 'LEVEL_UP_LEARNSET_MOVE' pokeruby/src/pokemon_1.c
+          ! grep -q 'gLevelUpLearnsets.*0x1FF' pokeruby/src/pokemon_1.c
+          ! grep -q 'gLevelUpLearnsets.*0x1FF' pokeruby/src/pokemon_3.c
 
       - name: Build patched Ruby
         run: |
