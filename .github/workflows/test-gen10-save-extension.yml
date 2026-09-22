@@ -72,7 +72,7 @@ jobs:
           grep -q 'gRubyStorageHeldMonExtension' pokeruby/src/pokemon_storage_system_4.c
           grep -q 'RubySaveExtensionMigrateLegacyMons' pokeruby/src/ruby_save_extension.c
           grep -q 'RubySaveExtensionMigrateLegacyMons' pokeruby/src/save.c
-          grep -q 'typedef u16 RubyAbilityId' pokeruby/include/ruby_save_extension.h
+          grep -q 'RubyAbilityId RubySaveExtensionResolveBoxMonAbility' pokeruby/include/ruby_save_extension.h
           grep -q 'RubySaveExtensionGetPartyAbility' pokeruby/src/ruby_save_extension.c
           grep -q 'RubySaveExtensionGetPcAbility' pokeruby/src/ruby_save_extension.c
           grep -q 'typedef u16 RubySpeciesId' pokeruby/include/ruby_gen10_ids.h
