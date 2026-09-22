@@ -10,6 +10,7 @@ on:
       - "patches/pokeruby/gen10-id-types.patch"
       - "patches/pokeruby/gen10-level-up-move-ids.patch"
       - "patches/pokeruby/gen10-random-move-ids.patch"
+      - "patches/pokeruby/gen10-tmhm-capacity.patch"
       - "tools/analyze_ruby_rom_save.py"
       - "tools/verify_ruby_save_sidecar.py"
       - "docs/ruby-rom-save-expansion.md"
@@ -63,6 +64,8 @@ jobs:
           git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-level-up-move-ids.patch"
           git -C pokeruby apply --check "$GITHUB_WORKSPACE/patches/pokeruby/gen10-random-move-ids.patch"
           git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-random-move-ids.patch"
+          git -C pokeruby apply --check "$GITHUB_WORKSPACE/patches/pokeruby/gen10-tmhm-capacity.patch"
+          git -C pokeruby apply "$GITHUB_WORKSPACE/patches/pokeruby/gen10-tmhm-capacity.patch"
           grep -q 'RUBY_SAVE_EXTENSION_SIZE 0x1800' pokeruby/include/ruby_save_extension.h
           grep -q 'RubySaveExtensionWriteSector' pokeruby/src/save.c
           grep -q 'src/ruby_save_extension.o(.text)' pokeruby/ld_script.txt
@@ -87,6 +90,10 @@ jobs:
           ! grep -q 'gLevelUpLearnsets.*0x1FF' pokeruby/src/pokemon_3.c
           ! grep -q 'gCurrentMove = (Random() & 0x1FF)' pokeruby/src/battle_script_commands.c
           grep -q 'Random() % (NUM_MOVES - 1)' pokeruby/src/battle_script_commands.c
+          grep -q 'TMHM_LEARNSET_WORDS ((NUM_TMHM_MOVES + 31) / 32)' pokeruby/include/constants/items.h
+          grep -q 'gTMHMLearnsets\[\]\[TMHM_LEARNSET_WORDS\]' pokeruby/src/data/pokemon/tmhm_learnsets.h
+          grep -q 'gTMHMLearnsets\[species\]\[tm >> 5\]' pokeruby/src/pokemon_3.c
+          grep -q 'CanMonLearnTMHM(struct Pokemon \*mon, u16 tm)' pokeruby/src/pokemon_3.c
 
       - name: Build patched Ruby
         run: |

@@ -165,3 +165,8 @@ Classic Ruby's random move selector masks `Random()` with `0x1FF`, limiting sele
 ## Easy Chat compatibility boundary
 
 Classic Easy Chat encodes a group plus species/move/word index into one `u16`, with a 9-bit index (`0x1FF`). That is a separate compatibility boundary from battle move storage and level-up learnsets. It is now tracked by the capacity audit. Expanding it requires a versioned representation for saved Easy Chat phrases and related Battle Tower/trade text data; the project will not silently widen those saved words and break legacy saves.
+
+
+## TM/HM compatibility capacity
+
+Classic Ruby stores TM/HM compatibility as exactly two `u32` words per species, capping the table at 64 machine slots. `patches/pokeruby/gen10-tmhm-capacity.patch` derives the row width as `ceil((NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES) / 32)`, widens the machine index accepted by `CanMonLearnTMHM` to 16 bits, and indexes the compatibility word generically. Existing 58-slot Ruby data remains byte-equivalent in meaning; future tables may populate additional words without another runtime rewrite.

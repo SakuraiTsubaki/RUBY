@@ -19,6 +19,7 @@ PATCHES = [
     ROOT / "patches" / "pokeruby" / "gen10-id-types.patch",
     ROOT / "patches" / "pokeruby" / "gen10-level-up-move-ids.patch",
     ROOT / "patches" / "pokeruby" / "gen10-random-move-ids.patch",
+    ROOT / "patches" / "pokeruby" / "gen10-tmhm-capacity.patch",
 ]
 
 

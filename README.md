@@ -52,6 +52,7 @@ See:
 - `patches/pokeruby/gen10-id-types.patch`
 - `patches/pokeruby/gen10-level-up-move-ids.patch`
 - `patches/pokeruby/gen10-random-move-ids.patch`
+- `patches/pokeruby/gen10-tmhm-capacity.patch`
 
 ## Generation X capacity policy
 

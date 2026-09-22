@@ -1,0 +1,95 @@
+diff --git a/include/constants/items.h b/include/constants/items.h
+--- a/include/constants/items.h
++++ b/include/constants/items.h
+@@ -366,8 +366,10 @@
+ #define ITEMS_COUNT 349
+ #define ITEM_FIELD_ARROW ITEMS_COUNT
+ 
+-#define NUM_TECHNICAL_MACHINES 50
+-#define NUM_HIDDEN_MACHINES     8
++#define NUM_TECHNICAL_MACHINES 50
++#define NUM_HIDDEN_MACHINES     8
++#define NUM_TMHM_MOVES (NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES)
++#define TMHM_LEARNSET_WORDS ((NUM_TMHM_MOVES + 31) / 32)
+ 
+ #define MAX_BAG_ITEM_CAPACITY  99
+ #define MAX_PC_ITEM_CAPACITY   999
+diff --git a/src/data/pokemon/tmhm_learnsets.h b/src/data/pokemon/tmhm_learnsets.h
+--- a/src/data/pokemon/tmhm_learnsets.h
++++ b/src/data/pokemon/tmhm_learnsets.h
+@@ -4,10 +4,11 @@
+ #define TMHM_LEARNSET(moves) {(u32)(moves), ((u64)(moves) >> 32)}
+ #define TMHM(tmhm) ((u64)1 << (ITEM_##tmhm - ITEM_TM01_FOCUS_PUNCH))
+ 
+-// This table determines which TMs and HMs a species is capable of learning.
+-// Each entry is a 64-bit bit array spread across two 32-bit values, with
+-// each bit corresponding to a .
+-const u32 gTMHMLearnsets[][2] =
++// This table determines which TMs and HMs a species is capable of learning.
++// Rows scale with the configured TM/HM count instead of being fixed to 64
++// compatibility bits. The legacy initializer fills the first two words;
++// additional words default to zero until expanded data explicitly populates them.
++const u32 gTMHMLearnsets[][TMHM_LEARNSET_WORDS] =
+ {
+     [SPECIES_NONE]        = TMHM_LEARNSET(0),
+ 
+diff --git a/include/pokemon.h b/include/pokemon.h
+--- a/include/pokemon.h
++++ b/include/pokemon.h
+@@ -494,7 +494,7 @@
+ void AdjustFriendship(struct Pokemon *, u8);
+ u8 CheckPartyHasHadPokerus(struct Pokemon *, u8);
+ void UpdatePartyPokerusTime(u16);
+-u32 CanMonLearnTMHM(struct Pokemon *, u8);
++u32 CanMonLearnTMHM(struct Pokemon *, u16);
+ u8 GetMoveTutorMoves(struct Pokemon *mon, u16 *moves);
+ u8 sub_8040574(struct Pokemon *party);
+ void ClearBattleMonForms(void);
+diff --git a/src/pokemon_3.c b/src/pokemon_3.c
+--- a/src/pokemon_3.c
++++ b/src/pokemon_3.c
+@@ -48,7 +48,7 @@
+ extern s8 gNatureStatTable[][5];
+ extern u16 gTrainerBattleOpponent;
+ extern u16 gBattleTypeFlags;
+-extern u32 gTMHMLearnsets[][2];
++extern u32 gTMHMLearnsets[][TMHM_LEARNSET_WORDS];
+ extern u8 gBattleMonForms[];
+ extern const u8 BattleText_Wally[];
+ extern s8 gPokeblockFlavorCompatibilityTable[];
+@@ -976,24 +976,17 @@
+     }
+ }
+ 
+-u32 CanMonLearnTMHM(struct Pokemon *mon, u8 tm)
+-{
+-    u16 species = GetMonData(mon, MON_DATA_SPECIES2, 0);
+-    if (species == SPECIES_EGG)
+-    {
+-        return 0;
+-    }
+-    else if (tm < 32)
+-    {
+-        u32 mask = 1 << tm;
+-        return gTMHMLearnsets[species][0] & mask;
+-    }
+-    else
+-    {
+-        u32 mask = 1 << (tm - 32);
+-        return gTMHMLearnsets[species][1] & mask;
+-    }
+-}
++u32 CanMonLearnTMHM(struct Pokemon *mon, u16 tm)
++{
++    u16 species = GetMonData(mon, MON_DATA_SPECIES2, 0);
++    u32 mask;
++
++    if (species == SPECIES_EGG || tm >= NUM_TMHM_MOVES)
++        return 0;
++
++    mask = 1u << (tm & 31);
++    return gTMHMLearnsets[species][tm >> 5] & mask;
++}
+ 
+ u8 GetMoveTutorMoves(struct Pokemon *mon, u16 *moves)
+ {
