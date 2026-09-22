@@ -245,3 +245,37 @@ diff --git a/src/save.c b/src/save.c
 +
      return 1;
  }
+
+diff --git a/ld_script.txt b/ld_script.txt
+--- a/ld_script.txt
++++ b/ld_script.txt
+@@ -338,6 +338,7 @@ SECTIONS {
+         src/roulette_util.o(.text);
+         src/cable_car_util.o(.text);
+         src/unused_8124F94.o(.text);
+         src/save.o(.text);
++        src/ruby_save_extension.o(.text);
+         src/mystery_event_script.o(.text);
+         src/debug/ereader_debug_menu.o(.text);
+         src/field_effect_helpers.o(.text);
+@@ -751,6 +752,7 @@ SECTIONS {
+         src/battle_message.o(.rodata);
+         src/choose_party.o(.rodata);
+         src/cable_car.o(.rodata);
+         src/save.o(.rodata);
++        src/ruby_save_extension.o(.rodata);
+         src/debug/ereader_debug_menu.o(.rodata);
+         src/field_effect_helpers.o(.rodata);
+         src/contest_ai.o(.rodata);
+diff --git a/sym_ewram.txt b/sym_ewram.txt
+--- a/sym_ewram.txt
++++ b/sym_ewram.txt
+@@ -354,6 +354,7 @@
+ . = ALIGN(4); src/battle_message.o(ewram_data);
+ . = ALIGN(4); src/choose_party.o(ewram_data);
+ . = ALIGN(4); src/cable_car.o(ewram_data);
+ . = ALIGN(4); src/save.o(ewram_data);
++. = ALIGN(4); src/ruby_save_extension.o(ewram_data);
+ . = ALIGN(4); src/mystery_event_script.o(ewram_data);
+ . = ALIGN(4); src/roamer.o(ewram_data);
+ . = ALIGN(4); src/use_pokeblock.o(ewram_data);

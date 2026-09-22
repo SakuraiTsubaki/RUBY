@@ -142,3 +142,8 @@ ROM-side table and ID expansion should proceed in parallel, but must use the Jap
 - confirmed sectors 28-31 remained untouched.
 
 All 12 supplied saves passed this in-memory round-trip verification.
+
+
+### Linker integration
+
+The save-extension patch explicitly places `ruby_save_extension.o` text and read-only data in the classic linker script and adds its EWRAM section to `sym_ewram.txt`. The classic pokeruby linker discards sections that are not explicitly listed, so new expansion objects must be registered in all required linker/symbol lists instead of relying on wildcard placement.
