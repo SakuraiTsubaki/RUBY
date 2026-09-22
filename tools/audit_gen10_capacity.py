@@ -100,6 +100,14 @@ def inspect_classic(root: Path) -> dict:
         "index_bits": int(ec_mask.group(1), 16).bit_length() if ec_mask else None,
         "runtime_0x1FF_refs": easy_chat_2.count("0x1FF"),
     }
+    tmhm_table = read(root / "src/data/pokemon/tmhm_learnsets.h")
+    tmhm_words = re.search(r"gTMHMLearnsets\[\]\[(\d+)\]", tmhm_table)
+    tmhm_capacity = {
+        "technical_machines": macro(items, "NUM_TECHNICAL_MACHINES"),
+        "hidden_machines": macro(items, "NUM_HIDDEN_MACHINES"),
+        "table_words": int(tmhm_words.group(1)) if tmhm_words else None,
+        "CanMonLearnTMHM.tm_arg_bits": function_arg_width(pokemon_3, "CanMonLearnTMHM", "tm"),
+    }
 
     return {
         "source": str(root),
@@ -120,6 +128,11 @@ def inspect_classic(root: Path) -> dict:
         "easy_chat_id_blockers": [
             "EC move/species index:9",
             "u16 group/index word",
+        ],
+        "tmhm_capacity": tmhm_capacity,
+        "tmhm_blockers": [
+            "gTMHMLearnsets[][2]:64 slots",
+            "CanMonLearnTMHM tm index:u8",
         ],
         "ability_8bit_blockers": sorted(
             [name for name, width in storage_bits.items() if "ability" in name.lower() and width == 8]
