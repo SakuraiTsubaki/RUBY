@@ -192,90 +192,140 @@ new file mode 100644
 diff --git a/src/save.c b/src/save.c
 --- a/src/save.c
 +++ b/src/save.c
-@@ -6,6 +6,7 @@
+@@ -5,8 +5,9 @@
+ #include "load_save.h"
+ #include "overworld.h"
  #include "pokemon.h"
- #include "save_failed_screen.h"
- #include "ewram.h"
+-#include "save_failed_screen.h"
+-#include "ewram.h"
++#include "save_failed_screen.h"
++#include "ewram.h"
 +#include "ruby_save_extension.h"
  
  #define FILE_SIGNATURE 0x08012025  // signature value to determine if a sector is in use
  
-@@ -181,6 +182,7 @@ static u8 WriteSaveBlockChunks(u16 chunkId, const struct SaveBlockChunk *chunks)
+@@ -181,9 +182,10 @@
+     u32 retVal;
      u16 i;
  
-     gFastSaveSection = eSaveSection;
+-    gFastSaveSection = eSaveSection;
+-
+-    if (chunkId != 0xFFFF)
++    gFastSaveSection = eSaveSection;
 +    RubySaveExtensionPrepareWrite();
- 
-     if (chunkId != 0xFFFF)  // write single chunk
++
++    if (chunkId != 0xFFFF)
      {
-@@ -237,6 +239,7 @@ static u8 WriteSingleChunk(u16 chunkId, const struct SaveBlockChunk *chunks)
+         retVal = WriteSingleChunk(chunkId, chunks);
+     }
+@@ -234,9 +236,10 @@
+     gFastSaveSection->id = chunkId;
+     gFastSaveSection->signature = FILE_SIGNATURE;
      gFastSaveSection->counter = gSaveCounter;
-     for (i = 0; i < chunkSize; i++)
-         gFastSaveSection->data[i] = chunkData[i];
+-    for (i = 0; i < chunkSize; i++)
+-        gFastSaveSection->data[i] = chunkData[i];
+-    gFastSaveSection->checksum = CalculateChecksum(chunkData, chunkSize);
++    for (i = 0; i < chunkSize; i++)
++        gFastSaveSection->data[i] = chunkData[i];
 +    RubySaveExtensionWriteSector(chunkId, gFastSaveSection->data, chunkSize);
-     gFastSaveSection->checksum = CalculateChecksum(chunkData, chunkSize);
++    gFastSaveSection->checksum = CalculateChecksum(chunkData, chunkSize);
  
      return TryWriteSector(sectorNum, gFastSaveSection->data);
-@@ -348,6 +351,7 @@ static u8 sub_81255B8(u16 chunkId, const struct SaveBlockChunk *chunks)
-     for (i = 0; i < size; i++)
-         gFastSaveSection->data[i] = data[i];
+ }
+@@ -359,10 +362,11 @@
+     gFastSaveSection->counter = gSaveCounter;
  
+     // set temp section's data.
+-    for (i = 0; i < size; i++)
+-        gFastSaveSection->data[i] = data[i];
+-
+-    // calculate checksum.
++    for (i = 0; i < size; i++)
++        gFastSaveSection->data[i] = data[i];
++
 +    RubySaveExtensionWriteSector(chunkId, gFastSaveSection->data, size);
-     // calculate checksum.
++    // calculate checksum.
      gFastSaveSection->checksum = CalculateChecksum(data, size);
  
-@@ -468,6 +472,8 @@ static u8 sub_81258BC(u16 a1, const struct SaveBlockChunk *chunks)
-     u16 sector = NUM_SECTORS_PER_SAVE_SLOT * (gSaveCounter % 2);
-     u16 id;
- 
+     EraseFlashSector(sector);
+@@ -478,10 +482,12 @@
+ {
+     u16 i;
+     u16 checksum;
+-    u16 sector = NUM_SECTORS_PER_SAVE_SLOT * (gSaveCounter % 2);
+-    u16 id;
+-
+-    for (i = 0; i < NUM_SECTORS_PER_SAVE_SLOT; i++)
++    u16 sector = NUM_SECTORS_PER_SAVE_SLOT * (gSaveCounter % 2);
++    u16 id;
++
 +    RubySaveExtensionBeginLoad();
 +
-     for (i = 0; i < NUM_SECTORS_PER_SAVE_SLOT; i++)
++    for (i = 0; i < NUM_SECTORS_PER_SAVE_SLOT; i++)
      {
          DoReadFlashWholeSection(i + sector, gFastSaveSection);
-@@ -481,8 +487,11 @@ static u8 sub_81258BC(u16 a1, const struct SaveBlockChunk *chunks)
+         id = gFastSaveSection->id;
+@@ -492,12 +498,15 @@
+          && gFastSaveSection->checksum == checksum)
+         {
              u16 j;
-             for (j = 0; j < chunks[id].size; j++)
-                 chunks[id].data[j] = gFastSaveSection->data[j];
+-            for (j = 0; j < chunks[id].size; j++)
+-                chunks[id].data[j] = gFastSaveSection->data[j];
+-        }
+-    }
+-
+-    return 1;
++            for (j = 0; j < chunks[id].size; j++)
++                chunks[id].data[j] = gFastSaveSection->data[j];
 +            RubySaveExtensionReadSector(id, gFastSaveSection->data, chunks[id].size);
-         }
-     }
- 
++        }
++    }
++
 +    RubySaveExtensionEndLoad();
 +
-     return 1;
++    return 1;
  }
-
+ 
+ static u8 GetSaveValidStatus(const struct SaveBlockChunk *chunks)
 diff --git a/ld_script.txt b/ld_script.txt
 --- a/ld_script.txt
 +++ b/ld_script.txt
-@@ -338,6 +338,7 @@ SECTIONS {
+@@ -338,8 +338,9 @@
          src/roulette_util.o(.text);
          src/cable_car_util.o(.text);
          src/unused_8124F94.o(.text);
-         src/save.o(.text);
+-        src/save.o(.text);
+-        src/mystery_event_script.o(.text);
++        src/save.o(.text);
 +        src/ruby_save_extension.o(.text);
-         src/mystery_event_script.o(.text);
++        src/mystery_event_script.o(.text);
          src/debug/ereader_debug_menu.o(.text);
          src/field_effect_helpers.o(.text);
-@@ -751,6 +752,7 @@ SECTIONS {
+         src/contest_ai.o(.text);
+@@ -751,8 +752,9 @@
          src/battle_message.o(.rodata);
          src/choose_party.o(.rodata);
          src/cable_car.o(.rodata);
-         src/save.o(.rodata);
+-        src/save.o(.rodata);
+-        src/debug/ereader_debug_menu.o(.rodata);
++        src/save.o(.rodata);
 +        src/ruby_save_extension.o(.rodata);
-         src/debug/ereader_debug_menu.o(.rodata);
++        src/debug/ereader_debug_menu.o(.rodata);
          src/field_effect_helpers.o(.rodata);
          src/contest_ai.o(.rodata);
+         src/battle_controller_safari.o(.rodata);
 diff --git a/sym_ewram.txt b/sym_ewram.txt
 --- a/sym_ewram.txt
 +++ b/sym_ewram.txt
-@@ -354,6 +354,7 @@
+@@ -354,8 +354,9 @@
  . = ALIGN(4); src/battle_message.o(ewram_data);
  . = ALIGN(4); src/choose_party.o(ewram_data);
  . = ALIGN(4); src/cable_car.o(ewram_data);
- . = ALIGN(4); src/save.o(ewram_data);
+-. = ALIGN(4); src/save.o(ewram_data);
+-. = ALIGN(4); src/mystery_event_script.o(ewram_data);
++. = ALIGN(4); src/save.o(ewram_data);
 +. = ALIGN(4); src/ruby_save_extension.o(ewram_data);
- . = ALIGN(4); src/mystery_event_script.o(ewram_data);
++. = ALIGN(4); src/mystery_event_script.o(ewram_data);
  . = ALIGN(4); src/roamer.o(ewram_data);
  . = ALIGN(4); src/use_pokeblock.o(ewram_data);
+ . = ALIGN(4); src/player_pc.o(ewram_data);
