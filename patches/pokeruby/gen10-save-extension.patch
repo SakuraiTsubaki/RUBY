@@ -210,11 +210,11 @@ diff --git a/src/save.c b/src/save.c
  
 -    gFastSaveSection = eSaveSection;
 -
--    if (chunkId != 0xFFFF)
+-    if (chunkId != 0xFFFF)  // write single chunk
 +    gFastSaveSection = eSaveSection;
 +    RubySaveExtensionPrepareWrite();
 +
-+    if (chunkId != 0xFFFF)
++    if (chunkId != 0xFFFF)  // write single chunk
      {
          retVal = WriteSingleChunk(chunkId, chunks);
      }
