@@ -1,0 +1,38 @@
+diff --git a/include/ruby_gen10_ids.h b/include/ruby_gen10_ids.h
+new file mode 100644
+--- /dev/null
++++ b/include/ruby_gen10_ids.h
+@@ -0,0 +1,20 @@
++#ifndef GUARD_RUBY_GEN10_IDS_H
++#define GUARD_RUBY_GEN10_IDS_H
++
++#include "global.h"
++
++// Capacity-first identifiers. These are storage/runtime contracts, not claims
++// about the number or identity of future Generation X content.
++typedef u16 RubySpeciesId;
++typedef u16 RubyMoveId;
++typedef u16 RubyItemId;
++typedef u16 RubyAbilityId;
++typedef u16 RubyDexId;
++typedef u16 RubyFormId;
++typedef u8 RubyTypeId;
++typedef u8 RubyGenerationId;
++
++#define RUBY_ID_NONE 0
++
++#endif // GUARD_RUBY_GEN10_IDS_H
+diff --git a/include/ruby_save_extension.h b/include/ruby_save_extension.h
+--- a/include/ruby_save_extension.h
++++ b/include/ruby_save_extension.h
+@@ -2,10 +2,10 @@
+ #define GUARD_RUBY_SAVE_EXTENSION_H
+ 
+ #include "global.h"
++#include "ruby_gen10_ids.h"
+ 
+ struct BoxPokemon;
+-typedef u16 RubyAbilityId;
+ 
+ #define RUBY_SAVE_EXTENSION_MAGIC 0x58594252 // "RBYX" in little endian
+ #define RUBY_SAVE_EXTENSION_VERSION 1

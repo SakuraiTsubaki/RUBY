@@ -49,6 +49,7 @@ See:
 - `patches/pokeruby/gen10-mon-metadata-movement.patch`
 - `patches/pokeruby/gen10-save-migration.patch`
 - `patches/pokeruby/gen10-ability-id-api.patch`
+- `patches/pokeruby/gen10-id-types.patch`
 
 ## Generation X capacity policy
 

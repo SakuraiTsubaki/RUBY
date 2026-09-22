@@ -40,6 +40,8 @@ rom_capacity:
   patch: patches/pokeruby/gen10-rom-capacity.patch
 
 capacity_targets:
+  canonical_id_patch: patches/pokeruby/gen10-id-types.patch
+  canonical_id_header: include/ruby_gen10_ids.h
   species_id_bits: 16
   move_id_bits: 16
   item_id_bits: 16

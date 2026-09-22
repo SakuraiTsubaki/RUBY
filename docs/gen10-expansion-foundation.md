@@ -145,3 +145,8 @@ This avoids silently breaking existing Ruby saves while still allowing the expan
 ## Verification
 
 `tools/audit_gen10_capacity.py` records the current classic and expanded capacity surfaces. CI keeps this inventory reproducible so later patches can prove which Generation III limits have actually been removed.
+
+
+## Canonical ID type layer
+
+`patches/pokeruby/gen10-id-types.patch` introduces a single capacity contract for expanded Ruby code: 16-bit species, move, item, ability, Pokédex, and reserved form IDs, plus 8-bit type and generation IDs. These typedefs do not alter the legacy encrypted `BoxPokemon` layout by themselves; they are the migration target for runtime APIs and expanded data tables so width changes are explicit instead of being scattered as raw integer types.
